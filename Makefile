@@ -48,11 +48,14 @@ tinygl.o: ../../utils/tinygl.c ../../drivers/avr/system.h ../../drivers/display.
 
 font.o: ../../utils/font.c ../../drivers/avr/system.h ../../utils/font.h
 	$(CC) -c $(CFLAGS) $< -o $@
+	
+led.o: ../../drivers/led.c ../../drivers/avr/system.h ../../drivers/led.h
+	$(CC) -c $(CFLAGS) $< -o $@
 
 
 
 # Link: create ELF output file from object files.
-game.out: game.o system.o pio.o pacer.o timer.o display.o ledmat.o navswitch.o tinygl.o font.o
+game.out: game.o system.o pio.o pacer.o timer.o display.o ledmat.o navswitch.o tinygl.o font.o led.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 

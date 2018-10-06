@@ -9,6 +9,7 @@
 #include "display.h"
 #include "navswitch.h"
 #include "tinygl.h"
+#include "led.h"
 
 #define PACER_HZ 300
 
@@ -55,16 +56,6 @@ static const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
     {1,0,1,1,0,0,0,0,1,1,0,1},
     {1,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,0,1,1,1,1,1}
-    /*{1,1,1,1,1,1,1,0,1,1,1,1},
-    {1,0,1,1,0,0,1,0,1,0,0,1},
-    {1,0,0,0,0,1,0,0,1,0,1,1},
-    {1,0,1,1,1,1,0,1,1,0,0,1},
-    {1,0,0,0,1,0,0,1,0,0,1,1},
-    {1,1,1,0,0,1,0,1,0,0,0,1},
-    {1,1,1,1,0,1,0,0,0,1,1,1},
-    {1,0,1,0,0,0,1,1,0,0,0,1},
-    {1,0,0,0,1,0,0,0,0,1,0,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1}*/
 };
 
 typedef struct point_s {
@@ -204,29 +195,46 @@ void game_init(Point* player_draw_pos, Point* grid_draw_origin)
 }
 
 
+void check_for_kill(Point* check_pos)
+{
+	if (p1.pos.row == check_pos->row && p1.pos.col == check_pos->col) {
+		led_set(LED1, 1);
+	}
+}
+
+
 void draw_shrapnel(Point* bomb_pos, Point* bomb_draw_pos) {
 	
-	Point directions[4] = {
+	Point directions[5] = {
+		{0, 0},
 		{0, 1},
 		{0, -1},
 		{1, 0},
 		{-1, 0}
 	};
 	Point draw_pos = {0, 0};
+	Point grid_check_pos = {0, 0};
 	int i = 0;
 	int j = 0;
 	
-	for (int dir = 0; dir < 4; dir++) {
+	for (int dir = 0; dir < 5; dir++) {
 		i = directions[dir].row;
 		j = directions[dir].col;
 		draw_pos.row = bomb_draw_pos->row + i;
 		draw_pos.col = bomb_draw_pos->col + j;
-		if (bitmap[bomb_pos->row + i][bomb_pos->col + j] == 0) {
+		grid_check_pos.row = bomb_pos->row + i;
+		grid_check_pos.col = bomb_pos->col + j;
+		
+		if (bitmap[grid_check_pos.row][grid_check_pos.col] == 0) {
 			display_pixel_set(draw_pos.col, draw_pos.row, 1);
+			check_for_kill(&grid_check_pos);
 			draw_pos.row += i;
 			draw_pos.col += j;
-			if (bitmap[bomb_pos->row + i + i][bomb_pos->col + j + j] == 0) {
+			grid_check_pos.row += i;
+			grid_check_pos.col += j;
+			if (bitmap[grid_check_pos.row][grid_check_pos.col] == 0) {
 				display_pixel_set(draw_pos.col, draw_pos.row, 1);
+				check_for_kill(&grid_check_pos);
 			}
 		}
 	}
@@ -244,15 +252,7 @@ void draw_bombs(Point* grid_origin)
 			if (bombs[bomb].fuse > 0) {
 				display_pixel_set(draw_pos.col, draw_pos.row, 1);
 			} else if (bombs[bomb].fuse > -SHRAPNEL_TIME) {
-				// detonate_bomb(col, row) // breaks the map apart if 1 tile off?
-				//shouldnt go through walls??
-				// display shrapnel:
 				draw_shrapnel(&bombs[bomb].pos, &draw_pos);
-				//display_pixel_set(bomb_pos.col, bomb_pos.row, 1);
-				//display_pixel_set(bomb_pos.col - 1, bomb_pos.row, 1);
-				//display_pixel_set(bomb_pos.col + 1, bomb_pos.row, 1);
-				//display_pixel_set(bomb_pos.col, bomb_pos.row - 1, 1);
-				//display_pixel_set(bomb_pos.col, bomb_pos.row + 1, 1);
 			} else {
 				update_map(grid_origin);
 				bombs[bomb].active = 0;
@@ -304,7 +304,8 @@ int main (void)
             player1_flash = !player1_flash;
             player_flash_counter = 0;
         }
-                display_pixel_set(player_draw_pos.col, player_draw_pos.row, player1_flash);
+        
+        display_pixel_set(player_draw_pos.col, player_draw_pos.row, player1_flash);
 
         display_update();
     }
