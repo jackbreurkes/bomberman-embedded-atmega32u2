@@ -1,7 +1,7 @@
 # File:   Group 415 Game Makefile
 # Author: Jack van Heugten Breurkes
 # Date:   01/10/18
-# Descr:  Makefile for maze game
+# Descr:  Makefile for bomberman game
 
 # Definitions.
 CC = avr-gcc
@@ -18,6 +18,7 @@ all: game.out
 # Compile: create object files from C source files.
 # why does this work when I delete the .h files from the game.o prereqs? :(
 # and without pio.o even existing or being in the game.out prereqs :(
+# do i need to add std lib assets here? how?
 game.o: game.c ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/avr/delay.h ../../utils/tinygl.h ../../utils/font.h
 	$(CC) -c $(CFLAGS) $< -o $@
 

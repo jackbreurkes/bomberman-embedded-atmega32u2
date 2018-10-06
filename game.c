@@ -1,3 +1,8 @@
+/*
+ * BANNER EXPLAINING FILE INFO
+ * NEEDED FOR ALL SOURCE FILES
+ */
+
 #include "system.h"
 #include "avr/pio.h"
 #include "pacer.h"
@@ -6,9 +11,6 @@
 #include "tinygl.h"
 
 #define PACER_HZ 300
-
-#define MAT_ROWS 7
-#define MAT_COLS 5
 
 #define MAP_ROWS 10
 #define MAP_COLS 12
@@ -39,16 +41,17 @@ static const pio_t cols[] =
 /** layout of the bitmap grid is the same orientation as the board. */
 static const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
 {
-    {1,1,1,1,1,1,1,1,1,1,1,1},
+	// 1s are walls, 0s are free space
+    {1,1,1,1,1,1,0,1,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,1,1,0,0,0,0,1,1,0,1},
     {1,0,1,1,0,1,1,0,1,1,0,1},
-    {1,0,0,0,0,1,1,0,0,0,0,1},
-    {1,0,0,0,0,1,1,0,0,0,0,1},
+    {1,0,0,0,0,1,1,0,0,0,0,0},
+    {0,0,0,0,0,1,1,0,0,0,0,1},
     {1,0,1,1,0,1,1,0,1,1,0,1},
     {1,0,1,1,0,0,0,0,1,1,0,1},
     {1,0,0,0,0,0,0,0,0,0,0,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1}
+    {1,1,1,1,1,1,0,1,1,1,1,1}
     /*{1,1,1,1,1,1,1,0,1,1,1,1},
     {1,0,1,1,0,0,1,0,1,0,0,1},
     {1,0,0,0,0,1,0,0,1,0,1,1},
@@ -62,8 +65,8 @@ static const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
 };
 
 typedef struct point_s {
-    uint8_t row;
-    uint8_t col;
+    int8_t row;
+    int8_t col;
 } Point;
 
 
@@ -88,65 +91,91 @@ static Bomb bombs[NUM_BOMBS] = {
     {0, 'b', {0, 0}, 200}
 };
 
-void place_bomb(uint8_t col, uint8_t row) {
-    if (bitmap[row][col] == 0) {
+void place_bomb(Point pos) {
+    if (bitmap[pos.row][pos.col] == 0) {
         bombs[0].active = 1;
-        bombs[0].pos.row = row;
-        bombs[0].pos.col = col;
+        bombs[0].pos.row = pos.row;
+        bombs[0].pos.col = pos.col;
         bombs[0].fuse = BOMB_FUSE;
-        //bitmap[row][col] = bombs[0].key;
     }
 }
 
 
-void move_player_by(Point diff) {
-    p1.pos.row += diff.row;
-    p1.pos.col += diff.col;
-
-    if (bitmap[p1.pos.row][p1.pos.col] != 0) {
-        p1.pos.row -= diff.row;
-        p1.pos.col -= diff.col;
+void move_player_by(Point diff)
+{
+	Point new_pos = {p1.pos.row + diff.row, p1.pos.col + diff.col};
+	
+	int in_row_bounds = new_pos.row >= 0 && new_pos.row < MAP_ROWS;
+	int in_col_bounds = new_pos.col >= 0 && new_pos.col < MAP_COLS;
+	int is_pos_free = bitmap[new_pos.row][new_pos.col] == 0;
+	
+    if (in_row_bounds && in_col_bounds && is_pos_free) {
+        p1.pos.row = new_pos.row;
+        p1.pos.col = new_pos.col;
     }
 }
 
 
-void handle_player_move(void)
+void handle_input(void)
 {
     Point move_diff = {0, 0};
 
     navswitch_update();
 
     if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
-
-        if (p1.pos.row > 0) {
-            move_diff.row = -1;
-        }
-
+		
+		move_diff.row = -1; // move up one row
+		
     } else if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
 
-        if (p1.pos.row < MAP_ROWS - 1) {
-            move_diff.row = 1;
-        }
+        move_diff.row = 1; // move down one row
 
     } else if (navswitch_push_event_p(NAVSWITCH_WEST)) {
 
-        if (p1.pos.col > 0) {
-            move_diff.col = -1;
-        }
+        move_diff.col = -1; // move left one column
 
     } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
 
-        if (p1.pos.col < MAP_COLS - 1) {
-            move_diff.col = 1;
-        }
+        move_diff.col = 1; // move right one column
 
     }  else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
 
-        place_bomb(p1.pos.col, p1.pos.row);
+        place_bomb(p1.pos);
 
     }
 
     move_player_by(move_diff);
+}
+
+
+void set_draw_positions(Point* grid_origin, Point* player_pos) {
+	
+	Point new_grid_origin = {
+		p1.pos.row - LEDMAT_ROWS_NUM / 2,
+		p1.pos.col - LEDMAT_COLS_NUM / 2
+	};
+	
+	Point player_draw_pos = {3, 2}; // where to draw the player on the matrix
+
+	if (new_grid_origin.row < 0) {
+		player_draw_pos.row += new_grid_origin.row;
+	} else if (new_grid_origin.row + LEDMAT_ROWS_NUM > MAP_ROWS) {
+		player_draw_pos.row += new_grid_origin.row + LEDMAT_ROWS_NUM - MAP_ROWS;
+	} else {
+		grid_origin->row = new_grid_origin.row;
+	}
+
+	if (new_grid_origin.col < 0) {
+		player_draw_pos.col += new_grid_origin.col;
+	} else if (new_grid_origin.col + LEDMAT_COLS_NUM > MAP_COLS) {
+		player_draw_pos.col += new_grid_origin.col + LEDMAT_COLS_NUM - MAP_COLS;
+	} else {
+		grid_origin->col = new_grid_origin.col;
+	}
+	
+	player_pos->row = player_draw_pos.row;
+	player_pos->col = player_draw_pos.col;
+
 }
 
 
@@ -156,61 +185,36 @@ int main (void)
     system_init ();
     navswitch_init();
     pacer_init(PACER_HZ);
+    display_init();
     //tinygl_init(TINYGL_WIDTH * 300);
-
-    /* Initialise LED matrix pins.  */
 
     p1.num = 1;
     p1.pos.row = 1;
     p1.pos.col = 1;
-
-    for (int i = 0; i < LEDMAT_COLS_NUM; i++) {
-        pio_config_set(cols[i], PIO_OUTPUT_HIGH);
-    }
-
-    for (int j = 0; j < LEDMAT_ROWS_NUM; j++) {
-        pio_config_set(rows[j], PIO_OUTPUT_HIGH);
-    }
-
-    int8_t draw_row_origin = 0;
-    int8_t draw_col_origin = 0;
+    
+    Point player_draw_pos = {0, 0};
+    Point grid_draw_origin = {0, 0}; // position of the top left LED on the LED matrix
 
     int player_flash_counter = 0;
     int player1_flash = 1;
 
     while (1)
     {
-        pacer_wait ();
+        pacer_wait();
 
-        handle_player_move();
+        handle_input();
+        
+        set_draw_positions(&grid_draw_origin, &player_draw_pos);
 
-        int p_rel_row = 0;
-        int p_rel_col = 0;
 
-        draw_row_origin = p1.pos.row - 3;
-        draw_col_origin = p1.pos.col - 2;
 
-        if (draw_row_origin < 0) {
-            p_rel_row = draw_row_origin;
-            draw_row_origin = 0;
-        } else if (draw_row_origin + MAT_ROWS > MAP_ROWS) {
-            p_rel_row = draw_row_origin + MAT_ROWS - MAP_ROWS;
-            draw_row_origin = MAP_ROWS - MAT_ROWS;
-        }
 
-        if (draw_col_origin < 0) {
-            p_rel_col = draw_col_origin;
-            draw_col_origin = 0;
-        } else if (draw_col_origin + MAT_COLS > MAP_COLS) {
-            p_rel_col = draw_col_origin + MAT_COLS - MAP_COLS;
-            draw_col_origin = MAP_COLS - MAT_COLS;
-        }
 
         //for (int row = 0; row < MAP_ROWS; row++) {
-        for (int row = draw_row_origin; row < draw_row_origin + MAT_ROWS; row++) {
+        for (int row = grid_draw_origin.row; row < grid_draw_origin.row + LEDMAT_ROWS_NUM; row++) {
             //for (int col = 0; col < MAP_COLS; col++) {
-            for (int col = draw_col_origin; col < draw_col_origin + MAT_COLS; col++) {
-                display_pixel_set(col - draw_col_origin, row - draw_row_origin, bitmap[row][col]);
+            for (int col = grid_draw_origin.col; col < grid_draw_origin.col + LEDMAT_COLS_NUM; col++) {
+                display_pixel_set(col - grid_draw_origin.col, row - grid_draw_origin.row, bitmap[row][col]);
             }
         }
 
@@ -218,20 +222,20 @@ int main (void)
             if (bombs[bomb].active == 1) {
                 bombs[bomb].fuse -= 1;
                 if (bombs[bomb].fuse > 0) {
-                    display_pixel_set(bombs[bomb].pos.col - draw_col_origin, bombs[bomb].pos.row - draw_row_origin, 1);
+                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
                 } else if (bombs[bomb].fuse > -SHRAPNEL_TIME) {
                     // detonate_bomb(col, row) // breaks the map apart if 1 tile off?
                     //shouldnt go through walls??
-                    // display shrapnel
-                    display_pixel_set(bombs[bomb].pos.col - draw_col_origin, bombs[bomb].pos.row - draw_row_origin, 1);
-                    display_pixel_set(bombs[bomb].pos.col + 1 - draw_col_origin, bombs[bomb].pos.row - draw_row_origin, 1);
-                    display_pixel_set(bombs[bomb].pos.col - 1 - draw_col_origin, bombs[bomb].pos.row - draw_row_origin, 1);
-                    display_pixel_set(bombs[bomb].pos.col + 2 - draw_col_origin, bombs[bomb].pos.row - draw_row_origin, 1);
-                    display_pixel_set(bombs[bomb].pos.col - 2 - draw_col_origin, bombs[bomb].pos.row - draw_row_origin, 1);
-                    display_pixel_set(bombs[bomb].pos.col - draw_col_origin, bombs[bomb].pos.row + 1 - draw_row_origin, 1);
-                    display_pixel_set(bombs[bomb].pos.col - draw_col_origin, bombs[bomb].pos.row - 1 - draw_row_origin, 1);
-                    display_pixel_set(bombs[bomb].pos.col - draw_col_origin, bombs[bomb].pos.row + 2 - draw_row_origin, 1);
-                    display_pixel_set(bombs[bomb].pos.col - draw_col_origin, bombs[bomb].pos.row - 2 - draw_row_origin, 1);
+                    // display shrapnel:
+                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
+                    display_pixel_set(bombs[bomb].pos.col + 1 - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
+                    display_pixel_set(bombs[bomb].pos.col - 1 - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
+                    display_pixel_set(bombs[bomb].pos.col + 2 - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
+                    display_pixel_set(bombs[bomb].pos.col - 2 - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
+                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row + 1 - grid_draw_origin.row, 1);
+                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row - 1 - grid_draw_origin.row, 1);
+                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row + 2 - grid_draw_origin.row, 1);
+                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row - 2 - grid_draw_origin.row, 1);
                 } else {
                     bombs[bomb].active = 0;
                 }
@@ -244,7 +248,7 @@ int main (void)
             player1_flash = !player1_flash;
             player_flash_counter = 0;
         }
-        display_pixel_set(2 + p_rel_col, 3 + p_rel_row, player1_flash);
+                display_pixel_set(player_draw_pos.col, player_draw_pos.row, player1_flash);
 
         display_update();
     }
