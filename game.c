@@ -15,6 +15,9 @@
 #define MAP_ROWS 10
 #define MAP_COLS 12
 
+#define MAT_MID_ROW (LEDMAT_ROWS_NUM / 2)
+#define MAT_MID_COL (LEDMAT_COLS_NUM / 2)
+
 #define NUM_BOMBS 2
 #define BOMB_FUSE (PACER_HZ * 3)
 #define SHRAPNEL_TIME (PACER_HZ * 0.5)
@@ -42,11 +45,11 @@ static const pio_t cols[] =
 static const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
 {
 	// 1s are walls, 0s are free space
-    {1,1,1,1,1,1,0,1,1,1,1,1},
+    {1,1,1,0,1,1,0,1,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,1,1,0,0,0,0,1,1,0,1},
-    {1,0,1,1,0,1,1,0,1,1,0,1},
-    {1,0,0,0,0,1,1,0,0,0,0,0},
+    {1,0,0,0,0,1,1,0,1,1,0,1},
+    {1,0,1,1,0,1,1,0,0,0,0,0},
     {0,0,0,0,0,1,1,0,0,0,0,1},
     {1,0,1,1,0,1,1,0,1,1,0,1},
     {1,0,1,1,0,0,0,0,1,1,0,1},
@@ -116,68 +119,147 @@ void move_player_by(Point diff)
 }
 
 
-void handle_input(void)
+int check_and_handle_input(void)
 {
+	/* checks for input and runs functions associated with input
+	 * returns 1 if input is detected or 0 otherwise 
+	 */
+	int input_registered = 1;
     Point move_diff = {0, 0};
 
     navswitch_update();
 
     if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
-		
 		move_diff.row = -1; // move up one row
-		
     } else if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
-
         move_diff.row = 1; // move down one row
-
     } else if (navswitch_push_event_p(NAVSWITCH_WEST)) {
-
         move_diff.col = -1; // move left one column
-
     } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
-
         move_diff.col = 1; // move right one column
-
     }  else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-
         place_bomb(p1.pos);
+    } else {
+		input_registered = 0;
+	}
 
-    }
-
-    move_player_by(move_diff);
+	if (input_registered == 1) {
+		move_player_by(move_diff);
+	}
+	
+	return input_registered;
 }
 
 
-void set_draw_positions(Point* grid_origin, Point* player_pos) {
+void set_draw_positions(Point* grid_origin, Point* player_draw_pos)
+{
+	/* updates the map's draw origin if the map can be drawn with the
+	 *     player in the center
+	 * otherwise updates the player's position on the screen and
+	 *     leaves the map in place */
 	
-	Point new_grid_origin = {
-		p1.pos.row - LEDMAT_ROWS_NUM / 2,
-		p1.pos.col - LEDMAT_COLS_NUM / 2
+	Point new_grid_origin = { // map point to be drawn at top left of matrix
+		p1.pos.row - MAT_MID_ROW,
+		p1.pos.col - MAT_MID_COL
 	};
-	
-	Point player_draw_pos = {3, 2}; // where to draw the player on the matrix
+	Point new_grid_close = { // map point to be drawn at the bottom right of the matrix
+		new_grid_origin.row + LEDMAT_ROWS_NUM - 1,
+		new_grid_origin.col + LEDMAT_COLS_NUM - 1
+	};
+	player_draw_pos->row = MAT_MID_ROW;
+	player_draw_pos->col = MAT_MID_COL;
 
 	if (new_grid_origin.row < 0) {
-		player_draw_pos.row += new_grid_origin.row;
-	} else if (new_grid_origin.row + LEDMAT_ROWS_NUM > MAP_ROWS) {
-		player_draw_pos.row += new_grid_origin.row + LEDMAT_ROWS_NUM - MAP_ROWS;
+		player_draw_pos->row += new_grid_origin.row;
+	} else if (new_grid_close.row > MAP_ROWS - 1) {
+		player_draw_pos->row += new_grid_close.row + 1 - MAP_ROWS;
 	} else {
 		grid_origin->row = new_grid_origin.row;
 	}
 
 	if (new_grid_origin.col < 0) {
-		player_draw_pos.col += new_grid_origin.col;
-	} else if (new_grid_origin.col + LEDMAT_COLS_NUM > MAP_COLS) {
-		player_draw_pos.col += new_grid_origin.col + LEDMAT_COLS_NUM - MAP_COLS;
+		player_draw_pos->col += new_grid_origin.col;
+	} else if (new_grid_close.col > MAP_COLS - 1) {
+		player_draw_pos->col += new_grid_close.col + 1 - MAP_COLS;
 	} else {
 		grid_origin->col = new_grid_origin.col;
 	}
-	
-	player_pos->row = player_draw_pos.row;
-	player_pos->col = player_draw_pos.col;
 
 }
 
+
+void update_map(const Point* origin)
+{
+	for (int row = origin->row; row < origin->row + LEDMAT_ROWS_NUM; row++) {
+		for (int col = origin->col; col < origin->col + LEDMAT_COLS_NUM; col++) {
+			display_pixel_set(col - origin->col, row - origin->row, bitmap[row][col]);
+		}
+	}
+}
+
+void game_init(Point* player_draw_pos, Point* grid_draw_origin)
+{
+	set_draw_positions(player_draw_pos, grid_draw_origin);
+	update_map(grid_draw_origin);
+}
+
+
+void draw_shrapnel(Point* bomb_pos, Point* bomb_draw_pos) {
+	
+	Point directions[4] = {
+		{0, 1},
+		{0, -1},
+		{1, 0},
+		{-1, 0}
+	};
+	Point draw_pos = {0, 0};
+	int i = 0;
+	int j = 0;
+	
+	for (int dir = 0; dir < 4; dir++) {
+		i = directions[dir].row;
+		j = directions[dir].col;
+		draw_pos.row = bomb_draw_pos->row + i;
+		draw_pos.col = bomb_draw_pos->col + j;
+		if (bitmap[bomb_pos->row + i][bomb_pos->col + j] == 0) {
+			display_pixel_set(draw_pos.col, draw_pos.row, 1);
+			draw_pos.row += i;
+			draw_pos.col += j;
+			if (bitmap[bomb_pos->row + i + i][bomb_pos->col + j + j] == 0) {
+				display_pixel_set(draw_pos.col, draw_pos.row, 1);
+			}
+		}
+	}
+}
+
+
+void draw_bombs(Point* grid_origin)
+{
+	Point draw_pos = {0, 0};
+	for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
+		if (bombs[bomb].active == 1) {
+			draw_pos.row = bombs[bomb].pos.row - grid_origin->row;
+			draw_pos.col = bombs[bomb].pos.col - grid_origin->col;
+			bombs[bomb].fuse -= 1;
+			if (bombs[bomb].fuse > 0) {
+				display_pixel_set(draw_pos.col, draw_pos.row, 1);
+			} else if (bombs[bomb].fuse > -SHRAPNEL_TIME) {
+				// detonate_bomb(col, row) // breaks the map apart if 1 tile off?
+				//shouldnt go through walls??
+				// display shrapnel:
+				draw_shrapnel(&bombs[bomb].pos, &draw_pos);
+				//display_pixel_set(bomb_pos.col, bomb_pos.row, 1);
+				//display_pixel_set(bomb_pos.col - 1, bomb_pos.row, 1);
+				//display_pixel_set(bomb_pos.col + 1, bomb_pos.row, 1);
+				//display_pixel_set(bomb_pos.col, bomb_pos.row - 1, 1);
+				//display_pixel_set(bomb_pos.col, bomb_pos.row + 1, 1);
+			} else {
+				update_map(grid_origin);
+				bombs[bomb].active = 0;
+			}
+		}
+	}
+}
 
 int main (void)
 {
@@ -192,55 +274,29 @@ int main (void)
     p1.pos.row = 1;
     p1.pos.col = 1;
     
-    Point player_draw_pos = {0, 0};
+    Point player_draw_pos = {p1.pos.row, p1.pos.col};
     Point grid_draw_origin = {0, 0}; // position of the top left LED on the LED matrix
+
+	//check_and_handle_input();
+	//set_draw_positions(&player_draw_pos, &grid_draw_origin);
+	update_map(&grid_draw_origin);
 
     int player_flash_counter = 0;
     int player1_flash = 1;
+    int input_registered = 0;
 
     while (1)
     {
         pacer_wait();
 
-        handle_input();
+        input_registered = check_and_handle_input();
         
-        set_draw_positions(&grid_draw_origin, &player_draw_pos);
-
-
-
-
-
-        //for (int row = 0; row < MAP_ROWS; row++) {
-        for (int row = grid_draw_origin.row; row < grid_draw_origin.row + LEDMAT_ROWS_NUM; row++) {
-            //for (int col = 0; col < MAP_COLS; col++) {
-            for (int col = grid_draw_origin.col; col < grid_draw_origin.col + LEDMAT_COLS_NUM; col++) {
-                display_pixel_set(col - grid_draw_origin.col, row - grid_draw_origin.row, bitmap[row][col]);
-            }
-        }
-
-        for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
-            if (bombs[bomb].active == 1) {
-                bombs[bomb].fuse -= 1;
-                if (bombs[bomb].fuse > 0) {
-                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
-                } else if (bombs[bomb].fuse > -SHRAPNEL_TIME) {
-                    // detonate_bomb(col, row) // breaks the map apart if 1 tile off?
-                    //shouldnt go through walls??
-                    // display shrapnel:
-                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
-                    display_pixel_set(bombs[bomb].pos.col + 1 - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
-                    display_pixel_set(bombs[bomb].pos.col - 1 - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
-                    display_pixel_set(bombs[bomb].pos.col + 2 - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
-                    display_pixel_set(bombs[bomb].pos.col - 2 - grid_draw_origin.col, bombs[bomb].pos.row - grid_draw_origin.row, 1);
-                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row + 1 - grid_draw_origin.row, 1);
-                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row - 1 - grid_draw_origin.row, 1);
-                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row + 2 - grid_draw_origin.row, 1);
-                    display_pixel_set(bombs[bomb].pos.col - grid_draw_origin.col, bombs[bomb].pos.row - 2 - grid_draw_origin.row, 1);
-                } else {
-                    bombs[bomb].active = 0;
-                }
-            }
-        }
+        if (input_registered) {
+			set_draw_positions(&grid_draw_origin, &player_draw_pos);
+			update_map(&grid_draw_origin);
+		}
+		
+		draw_bombs(&grid_draw_origin);
 
         if (player_flash_counter < PLAYER_FLASH_RATE) {
             player_flash_counter++;
