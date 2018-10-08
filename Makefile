@@ -19,7 +19,15 @@ all: game.out
 # why does this work when I delete the .h files from the game.o prereqs? :(
 # and without pio.o even existing or being in the game.out prereqs :(
 # do i need to add std lib assets here? how?
-game.o: game.c ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/avr/delay.h ../../utils/tinygl.h ../../utils/font.h
+# do i need to add dependencies of dependencies to game.o??
+#I set up the Point type in point.h, point.c is empty. Do I need it??
+game.o: game.c bomb.h ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/navswitch.h ../../utils/tinygl.h ../../drivers/led.h ../../drivers/avr/ir_uart.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+point.o: point.c ../../drivers/avr/system.h point.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+bomb.o: bomb.c ../../drivers/avr/system.h point.h bomb.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 system.o: ../../drivers/avr/system.c ../../drivers/avr/system.h
@@ -52,10 +60,22 @@ font.o: ../../utils/font.c ../../drivers/avr/system.h ../../utils/font.h
 led.o: ../../drivers/led.c ../../drivers/avr/system.h ../../drivers/led.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
+ir_uart.o: ../../drivers/avr/ir_uart.c ../../drivers/avr/ir_uart.h ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/avr/timer0.h ../../drivers/avr/usart1.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+timer0.o: ../../drivers/avr/timer0.c ../../drivers/avr/bits.h ../../drivers/avr/prescale.h ../../drivers/avr/system.h ../../drivers/avr/timer0.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+usart1.o: ../../drivers/avr/usart1.c ../../drivers/avr/system.h ../../drivers/avr/usart1.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+prescale.o: ../../drivers/avr/prescale.c ../../drivers/avr/prescale.h ../../drivers/avr/system.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
 
 
 # Link: create ELF output file from object files.
-game.out: game.o system.o pio.o pacer.o timer.o display.o ledmat.o navswitch.o tinygl.o font.o led.o
+game.out: game.o point.o bomb.o system.o pio.o pacer.o timer.o display.o ledmat.o navswitch.o tinygl.o font.o led.o ir_uart.o timer0.o usart1.o prescale.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 
