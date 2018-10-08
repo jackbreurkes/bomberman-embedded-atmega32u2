@@ -13,13 +13,13 @@
 #include "ir_uart.h"
 #include <stdbool.h>
 
-#include "point.h"
+#include "setup.h"
 #include "bomb.h"
 
 #define PACER_HZ 300
 
-#define MAP_ROWS 10
-#define MAP_COLS 12
+//#define MAP_ROWS 10
+//#define MAP_COLS 12
 
 #define MAT_MID_ROW (LEDMAT_ROWS_NUM / 2)
 #define MAT_MID_COL (LEDMAT_COLS_NUM / 2)
@@ -32,7 +32,7 @@
 
 
 /** layout of the bitmap grid is the same orientation as the board. */
-static const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
+/*static const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
 {
 	// 1s are walls, 0s are free space
     {1,1,1,0,1,1,0,1,1,1,1,1},
@@ -45,7 +45,7 @@ static const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
     {1,0,1,1,0,0,0,0,1,1,0,1},
     {1,0,0,0,0,0,0,0,0,0,0,1},
     {1,1,1,1,1,1,0,1,1,1,1,1}
-};
+};*/
 
 /*typedef struct point_s {
     int8_t row;
@@ -53,11 +53,11 @@ static const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
 } Point;*/
 
 
-typedef struct player_s {
+/*typedef struct player_s {
     uint8_t num;
     Point pos;
     uint8_t current_bomb;
-} Player;
+} Player;*/
 
 
 /*typedef struct bomb_s {
@@ -70,43 +70,58 @@ typedef struct player_s {
 
 static Player player;
 
-static Bomb bombs[NUM_BOMBS] = {
+/*static Bomb bombs[NUM_BOMBS] = {
     {0, 0, {0, 0}, BOMB_FUSE},
     {0, 1, {0, 0}, BOMB_FUSE},
     {0, 2, {0, 0}, BOMB_FUSE},
     {0, 3, {0, 0}, BOMB_FUSE},
     {0, 4, {0, 0}, BOMB_FUSE},
     {0, 5, {0, 0}, BOMB_FUSE}
-};
+};*/
 
 
-
-void bomb_at_pos(Point pos, bool is_current_player) {
+/*static uint8_t enemy_bomb_num = 0;
+void bomb_at_pos(Point pos, Player* playerX, bool is_current_player) {
     if (bitmap[pos.row][pos.col] == 0) {
-		uint8_t bomb_num = player.current_bomb;
-        bombs[bomb_num].active = 1;
-        bombs[bomb_num].pos.row = pos.row;
-        bombs[bomb_num].pos.col = pos.col;
-        bombs[bomb_num].fuse = BOMB_FUSE;
-        if (player.num == 1 && bomb_num == NUM_BOMBS / 2 - 1) {
-			bomb_num = 0;
-		} else if (player.num == 2 && bomb_num == NUM_BOMBS - 1) {
-			bomb_num = NUM_BOMBS / 2;
-		} else {
-			bomb_num++;
+		if (is_current_player) {
+			uint8_t bomb_num = playerX->current_bomb;
+	        bombs[bomb_num].active = 1;
+	        bombs[bomb_num].pos.row = pos.row;
+	        bombs[bomb_num].pos.col = pos.col;
+	        bombs[bomb_num].fuse = BOMB_FUSE;
+	        if (playerX->num == 1 && bomb_num == NUM_BOMBS / 2 - 1) {
+				bomb_num = 0;
+			} else if (playerX->num == 2 && bomb_num == NUM_BOMBS - 1) {
+				bomb_num = NUM_BOMBS / 2;
+			} else {
+				bomb_num++;
+			}
+			playerX->current_bomb = bomb_num;
+	    } else {
+			if (playerX->num == 1) {
+				bombs[enemy_bomb_num + (NUM_BOMBS / 2)].active = 1;
+				bombs[enemy_bomb_num + (NUM_BOMBS / 2)].pos.row = pos.row;
+				bombs[enemy_bomb_num + (NUM_BOMBS / 2)].pos.col = pos.col;
+				bombs[enemy_bomb_num + (NUM_BOMBS / 2)].fuse = BOMB_FUSE;
+			} else {
+				bombs[enemy_bomb_num].active = 1;
+				bombs[enemy_bomb_num].pos.row = pos.row;
+				bombs[enemy_bomb_num].pos.col = pos.col;
+				bombs[enemy_bomb_num].fuse = BOMB_FUSE;
+			}
+			enemy_bomb_num = (enemy_bomb_num + 1) % (NUM_BOMBS / 2);
 		}
-		player.current_bomb = bomb_num;
-    }
+	}
 }
 
 
-void drop_bomb(Point pos) {
-	bomb_at_pos(pos, 1);
+void drop_bomb(Point pos, Player* playerX) {
+	bomb_at_pos(pos, playerX, 1);
 }
 
-void enemy_bomb(Point pos) {
-	bomb_at_pos(pos, 0);
-}
+void enemy_bomb(Point pos, Player* playerX) {
+	bomb_at_pos(pos, playerX, 0);
+}*/
 
 
 void move_player_by(Point diff)
@@ -143,7 +158,8 @@ int check_and_handle_input(void)
     } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
         move_diff.col = 1; // move right one column
     }  else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-        drop_bomb(player.pos);
+        drop_bomb(player.pos, &player);
+        //bomb_at_pos(player.pos, 0);
     } else {
 		input_registered = false;
 	}
@@ -221,8 +237,8 @@ void check_for_kill(Point* check_pos)
 }
 
 
-void draw_shrapnel(Point* bomb_pos, Point* bomb_draw_pos) {
-	
+void draw_shrapnel(Point* bomb_pos, Point* bomb_draw_pos)
+{
 	Point directions[5] = {
 		{0, 0},
 		{0, 1},
@@ -383,7 +399,7 @@ int main (void)
 			if (prev_read_char == 'b') {
 				pos_from_read.row = (read_char - 1) / MAP_ROWS;
 				pos_from_read.col = (read_char - 1) % MAP_ROWS;
-				enemy_bomb(pos_from_read);
+				enemy_bomb(pos_from_read, &player);
 			} else if (prev_read_char == 'p') {
 				pos_from_read.row = (read_char - 1) / MAP_ROWS;
 				pos_from_read.col = (read_char - 1) % MAP_ROWS;

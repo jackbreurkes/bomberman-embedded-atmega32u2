@@ -3,7 +3,8 @@
  * NEEDED FOR ALL SOURCE FILES
  */
  
-#include "point.h"
+#include "setup.h"
+#include <stdbool.h>
 
 #define PACER_HZ 300
 #define NUM_BOMBS 6
@@ -16,4 +17,10 @@ typedef struct bomb_s {
     int16_t fuse;
 } Bomb;
 
+extern Bomb bombs[NUM_BOMBS];
 
+void bomb_at_pos(Point pos, Player* playerX, bool is_current_player);
+
+void drop_bomb(Point pos, Player* playerX);
+
+void enemy_bomb(Point pos, Player* playerX);
