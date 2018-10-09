@@ -1,4 +1,4 @@
-#include "setup.h"
+#include "movement.h"
 
 const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
 {

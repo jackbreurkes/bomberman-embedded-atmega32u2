@@ -3,7 +3,7 @@
  * NEEDED FOR ALL SOURCE FILES
  */
 #include "system.h"
-#include "setup.h"
+#include "movement.h"
 #include "bomb.h"
 
 Bomb bombs[NUM_BOMBS] = {

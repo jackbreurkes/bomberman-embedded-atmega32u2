@@ -3,7 +3,7 @@
  * NEEDED FOR ALL SOURCE FILES
  */
  
-#include "setup.h"
+#include "movement.h"
 #include "player.h"
 #include <stdbool.h>
 

@@ -13,7 +13,7 @@
 #include "ir_uart.h"
 #include <stdbool.h>
 
-#include "setup.h"
+#include "movement.h"
 #include "player.h"
 #include "bomb.h"
 
