@@ -21,13 +21,16 @@ all: game.out
 # do i need to add std lib assets here? how?
 # do i need to add dependencies of dependencies to game.o??
 #I set up the Point type in point.h, point.c is empty. Do I need it??
-game.o: game.c bomb.h setup.h ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/navswitch.h ../../utils/tinygl.h ../../drivers/led.h ../../drivers/avr/ir_uart.h
+game.o: game.c bomb.h setup.h player.h ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/navswitch.h ../../utils/tinygl.h ../../drivers/led.h ../../drivers/avr/ir_uart.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 setup.o: setup.c ../../drivers/avr/system.h setup.h
 	$(CC) -c $(CFLAGS) $< -o $@
+	
+player.o: player.c ../../drivers/avr/system.h player.h
+	$(CC) -c $(CFLAGS) $< -o $@
 
-bomb.o: bomb.c ../../drivers/avr/system.h setup.h bomb.h
+bomb.o: bomb.c ../../drivers/avr/system.h setup.h player.h bomb.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 system.o: ../../drivers/avr/system.c ../../drivers/avr/system.h
@@ -75,7 +78,7 @@ prescale.o: ../../drivers/avr/prescale.c ../../drivers/avr/prescale.h ../../driv
 
 
 # Link: create ELF output file from object files.
-game.out: game.o setup.o bomb.o system.o pio.o pacer.o timer.o display.o ledmat.o navswitch.o tinygl.o font.o led.o ir_uart.o timer0.o usart1.o prescale.o
+game.out: game.o setup.o bomb.o player.o system.o pio.o pacer.o timer.o display.o ledmat.o navswitch.o tinygl.o font.o led.o ir_uart.o timer0.o usart1.o prescale.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 

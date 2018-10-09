@@ -4,6 +4,7 @@
  */
  
 #include "setup.h"
+#include "player.h"
 #include <stdbool.h>
 
 #define PACER_HZ 300
