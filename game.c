@@ -377,7 +377,7 @@ int main (void)
         uint8_t write_bomb_id = 0;
         if (ir_uart_write_ready_p()) {
             if (bombs[0].active && !bombs[0].transmitted) {
-                char c = bombs[0].pos.row * MAP_ROWS + bombs[write_bomb_id].pos.col;
+                char c = bombs[0].pos.row * MAP_COLS + bombs[write_bomb_id].pos.col;
                 ir_uart_putc(c);
                 bombs[0].transmitted = true;
             }
@@ -387,8 +387,8 @@ int main (void)
         if (ir_uart_read_ready_p()) {
             read_char = ir_uart_getc();
             //if (read_char == 'b') {
-                pos_from_read.row = (read_char) / MAP_ROWS;
-                pos_from_read.col = (read_char) % MAP_ROWS;
+                pos_from_read.row = (read_char) / MAP_COLS;
+                pos_from_read.col = (read_char) % MAP_COLS;
                 enemy_bomb(pos_from_read, &player);
             //}
             //prev_read_char = read_char;
