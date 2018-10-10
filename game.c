@@ -377,7 +377,7 @@ int main (void)
         uint8_t write_bomb_id = 0;
         if (ir_uart_write_ready_p()) {
             if (bombs[0].active && !bombs[0].transmitted) {
-                char c = MAP_ROWS + 1;//bombs[0].pos.row * MAP_ROWS + bombs[write_bomb_id].pos.col;
+                char c = bombs[0].pos.row * MAP_ROWS + bombs[write_bomb_id].pos.col;
                 ir_uart_putc(c);
                 bombs[0].transmitted = true;
             }
