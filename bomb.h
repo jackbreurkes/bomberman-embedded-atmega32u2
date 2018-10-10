@@ -2,7 +2,7 @@
  * BANNER EXPLAINING FILE INFO
  * NEEDED FOR ALL SOURCE FILES
  */
- 
+
 #include "movement.h"
 #include "player.h"
 #include <stdbool.h>
@@ -16,6 +16,7 @@ typedef struct bomb_s {
     uint8_t bomb_id;
     Point pos;
     int16_t fuse;
+    bool transmitted;
 } Bomb;
 
 extern Bomb bombs[NUM_BOMBS];

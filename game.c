@@ -388,15 +388,16 @@ int main (void)
                 ir_uart_putc('b');
                 uart_step++;
             } else if (uart_step == 1) {
-                if (bombs[0].active) {
+                if (bombs[0].active && !bombs[0].transmitted) {
                     char c = bombs[0].pos.row * MAP_ROWS + bombs[write_bomb_id].pos.col;
                     ir_uart_putc(c);
+                    bombs[0].transmitted = true;
                     uart_step++;
                 }
             } else {
                 //uart_info[0] = 'p';
                 //uart_info[1] = player.pos.row * MAP_ROWS + player.pos.col + 1;
-                //uart_step = 0;
+                uart_step = 0;
             }
             uart_info[2] = 0;
             //ir_uart_puts(uart_info);
@@ -406,7 +407,7 @@ int main (void)
         Point pos_from_read = {0, 0};
         if (ir_uart_read_ready_p()) {
             read_char = ir_uart_getc();
-            if (prev_read_char == 'b') {
+            if (read_char == 'b') {
                 pos_from_read.row = 1;//(read_char) / MAP_ROWS;
                 pos_from_read.col = 1;//(read_char) % MAP_ROWS;
                 enemy_bomb(pos_from_read, &player);
