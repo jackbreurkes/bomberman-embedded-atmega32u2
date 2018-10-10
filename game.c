@@ -347,7 +347,7 @@ int main (void)
     update_map(&grid_draw_origin);
 
     char read_char = 0;
-    char prev_read_char = 0;
+    //char prev_read_char = 0;
     while (1)
     {
         pacer_wait();
@@ -376,33 +376,11 @@ int main (void)
 
         uint8_t write_bomb_id = 0;
         if (ir_uart_write_ready_p()) {
-            //char c = bombs[0].pos.row * MAP_ROWS + bombs[write_bomb_id].pos.col + 1;
-            if (uart_step == 0) {
-                /*uart_info[0] = 'b';
-                write_bomb_id = uart_step;
-                if (player.num == 2) {
-                    write_bomb_id += NUM_BOMBS / 2;
-                }
-                uart_info[1] = bombs[write_bomb_id].pos.row * MAP_ROWS + bombs[write_bomb_id].pos.col + 1;*/
-                if (!bombs[0].transmitted) {
-                    ir_uart_putc('b');
-                }
-                uart_step++;
-            } else if (uart_step < uart_cycle_length) {
-                if (bombs[0].active && !bombs[0].transmitted) {
-                    char c = bombs[0].pos.row * MAP_ROWS + bombs[write_bomb_id].pos.col;
-                    ir_uart_putc(c);
-                    bombs[0].transmitted = true;
-                }
-                uart_step++;
-            } else {
-                //uart_info[0] = 'p';
-                //uart_info[1] = player.pos.row * MAP_ROWS + player.pos.col + 1;
-                uart_step = 0;
+            if (bombs[0].active && !bombs[0].transmitted) {
+                char c = bombs[0].pos.row * MAP_ROWS + bombs[write_bomb_id].pos.col;
+                ir_uart_putc('b');
+                bombs[0].transmitted = true;
             }
-            uart_info[2] = 0;
-            //ir_uart_puts(uart_info);
-            //ir_uart_putc(c);
         }
 
         Point pos_from_read = {0, 0};
@@ -412,15 +390,8 @@ int main (void)
                 pos_from_read.row = 1;//(read_char) / MAP_ROWS;
                 pos_from_read.col = 1;//(read_char) % MAP_ROWS;
                 enemy_bomb(pos_from_read, &player);
-            } else if (prev_read_char == 'p') {
-                pos_from_read.row = (read_char - 1) / MAP_ROWS;
-                pos_from_read.col = (read_char - 1) % MAP_ROWS;
-                // do something with player pos
             }
-            //pos_from_read.row = (read_char - 1) / MAP_ROWS;
-            //pos_from_read.col = (read_char - 1) % MAP_ROWS;
-            //enemy_bomb(pos_from_read, &player);
-            prev_read_char = read_char;
+            //prev_read_char = read_char;
         }
 
     }
