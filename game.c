@@ -160,7 +160,6 @@ int check_and_handle_input(void)
         move_diff.col = 1; // move right one column
     }  else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
         drop_bomb(player.pos, &player);
-        //bomb_at_pos(player.pos, 0);
     } else {
         input_registered = false;
     }
@@ -319,7 +318,7 @@ int main (void)
     bool player_chosen = false;
 
     int uart_step = 0;
-    int uart_cycle_length = NUM_BOMBS / 2;
+    int uart_cycle_length = 8;//NUM_BOMBS / 2;
 
     while (!player_chosen) {
         navswitch_update();
@@ -385,15 +384,17 @@ int main (void)
                     write_bomb_id += NUM_BOMBS / 2;
                 }
                 uart_info[1] = bombs[write_bomb_id].pos.row * MAP_ROWS + bombs[write_bomb_id].pos.col + 1;*/
-                ir_uart_putc('b');
+                if (!bombs[0].transmitted) {
+                    ir_uart_putc('b');
+                }
                 uart_step++;
-            } else if (uart_step == 1) {
+            } else if (uart_step < uart_cycle_length) {
                 if (bombs[0].active && !bombs[0].transmitted) {
                     char c = bombs[0].pos.row * MAP_ROWS + bombs[write_bomb_id].pos.col;
                     ir_uart_putc(c);
                     bombs[0].transmitted = true;
-                    uart_step++;
                 }
+                uart_step++;
             } else {
                 //uart_info[0] = 'p';
                 //uart_info[1] = player.pos.row * MAP_ROWS + player.pos.col + 1;

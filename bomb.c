@@ -8,12 +8,12 @@
 #include <stdbool.h>
 
 Bomb bombs[NUM_BOMBS] = {
-    {0, 0, {0, 0}, BOMB_FUSE, false},
-    {0, 1, {0, 0}, BOMB_FUSE, false},
-    {0, 2, {0, 0}, BOMB_FUSE, false},
-    {0, 3, {0, 0}, BOMB_FUSE, false},
-    {0, 4, {0, 0}, BOMB_FUSE, false},
-    {0, 5, {0, 0}, BOMB_FUSE, false}
+    {0, 0, {0, 0}, BOMB_FUSE, true},
+    {0, 1, {0, 0}, BOMB_FUSE, true},
+    {0, 2, {0, 0}, BOMB_FUSE, true},
+    {0, 3, {0, 0}, BOMB_FUSE, true},
+    {0, 4, {0, 0}, BOMB_FUSE, true},
+    {0, 5, {0, 0}, BOMB_FUSE, true}
 };
 
 static uint8_t enemy_bomb_num = 0;
