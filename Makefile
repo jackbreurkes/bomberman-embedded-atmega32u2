@@ -16,17 +16,12 @@ all: game.out
 
 
 # Compile: create object files from C source files.
-# why does this work when I delete the .h files from the game.o prereqs? :(
-# and without pio.o even existing or being in the game.out prereqs :(
-# do i need to add std lib assets here? how?
-# do i need to add dependencies of dependencies to game.o??
-#I set up the Point type in point.h, point.c is empty. Do I need it??
 game.o: game.c bomb.h movement.h player.h ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/navswitch.h ../../utils/tinygl.h ../../drivers/led.h ../../drivers/avr/ir_uart.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 movement.o: movement.c ../../drivers/avr/system.h movement.h
 	$(CC) -c $(CFLAGS) $< -o $@
-	
+
 player.o: player.c ../../drivers/avr/system.h player.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
@@ -59,7 +54,7 @@ tinygl.o: ../../utils/tinygl.c ../../drivers/avr/system.h ../../drivers/display.
 
 font.o: ../../utils/font.c ../../drivers/avr/system.h ../../utils/font.h
 	$(CC) -c $(CFLAGS) $< -o $@
-	
+
 led.o: ../../drivers/led.c ../../drivers/avr/system.h ../../drivers/led.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
