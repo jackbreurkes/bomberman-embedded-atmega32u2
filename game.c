@@ -407,8 +407,8 @@ int main (void)
         if (ir_uart_read_ready_p()) {
             read_char = ir_uart_getc();
             if (prev_read_char == 'b') {
-                pos_from_read.row = (read_char) / MAP_ROWS;
-                pos_from_read.col = (read_char) % MAP_ROWS;
+                pos_from_read.row = 1;//(read_char) / MAP_ROWS;
+                pos_from_read.col = 1;//(read_char) % MAP_ROWS;
                 enemy_bomb(pos_from_read, &player);
             } else if (prev_read_char == 'p') {
                 pos_from_read.row = (read_char - 1) / MAP_ROWS;
@@ -418,7 +418,7 @@ int main (void)
             //pos_from_read.row = (read_char - 1) / MAP_ROWS;
             //pos_from_read.col = (read_char - 1) % MAP_ROWS;
             //enemy_bomb(pos_from_read, &player);
-              //prev_read_char = read_char;
+            prev_read_char = read_char;
         }
 
     }
