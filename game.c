@@ -158,7 +158,7 @@ bool check_and_handle_input(void)
     } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
         move_diff.col = 1; // move right one column
     }  else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-        drop_bomb(player.pos, &player);
+        enemy_bomb(player.pos, &player);
     } else {
         input_registered = false;
     }
@@ -320,7 +320,7 @@ int main (void)
                 player.num = 2;
                 player.pos.row = MAP_ROWS - 2;
                 player.pos.col = MAP_COLS - 2;
-                player.current_bomb = NUM_BOMBS / 2;
+                player.current_bomb = 0;//NUM_BOMBS / 2;
                 player_chosen = true;
             }
         }
@@ -330,7 +330,7 @@ int main (void)
 
     char read_char = 0;
     Point pos_from_read = {0, 0};
-            
+
     while (1)
     {
         pacer_wait();
@@ -358,13 +358,13 @@ int main (void)
         display_update();
 
         uint8_t write_bomb_id = 0;
-        if (ir_uart_write_ready_p()) {
+        /*if (ir_uart_write_ready_p()) {
             if (bombs[0].active && !bombs[0].transmitted) {
                 char c = bombs[0].pos.row * MAP_COLS + bombs[write_bomb_id].pos.col;
                 ir_uart_putc(c);
                 bombs[0].transmitted = true;
             }
-        }
+        }*/
 
         if (ir_uart_read_ready_p()) {
             read_char = ir_uart_getc();
