@@ -2,7 +2,7 @@
 #define PLAYER_H
 
 #include "system.h"
-#include "movement.h"
+#include "position.h"
 
 typedef struct player_s {
     uint8_t num;

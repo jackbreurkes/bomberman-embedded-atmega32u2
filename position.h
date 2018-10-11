@@ -1,5 +1,5 @@
-#ifndef POINT_H
-#define POINT_H
+#ifndef MAP_H
+#define MAP_H
 
 #include "system.h"
 
@@ -12,5 +12,7 @@ typedef struct point_s {
 } Point;
 
 extern const uint8_t bitmap[MAP_ROWS][MAP_COLS];
+
+void update_map(const Point* origin);
 
 #endif

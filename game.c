@@ -8,12 +8,11 @@
 #include "pacer.h"
 #include "display.h"
 #include "navswitch.h"
-#include "tinygl.h"
 #include "led.h"
 #include "ir_uart.h"
 #include <stdbool.h>
 
-#include "movement.h"
+#include "position.h"
 #include "player.h"
 #include "bomb.h"
 
@@ -27,7 +26,7 @@
 
 #define NUM_BOMBS 6
 #define BOMB_FUSE (PACER_HZ * 3) // fuse time in seconds
-#define SHRAPNEL_TIME (PACER_HZ * 0.3)
+
 
 #define PLAYER_FLASH_RATE 50
 
@@ -140,10 +139,10 @@ void enemy_bomb(Point pos, Player* playerX) {
 }*/
 
 
-int check_and_handle_input(void)
+bool check_and_handle_input(void)
 {
     /* checks for input and runs functions associated with input
-     * returns 1 if input is detected or 0 otherwise
+     * returns true if input is detected or false otherwise
      */
     bool input_registered = true;
     Point move_diff = {0, 0};
@@ -172,7 +171,7 @@ int check_and_handle_input(void)
 }
 
 
-void set_draw_positions(Point* grid_origin, Point* player_draw_pos)
+void set_draw_positions(Point player_pos, Point* grid_origin, Point* player_draw_pos)
 {
     /* updates the map's draw origin if the map can be drawn with the
      *     player in the center
@@ -180,8 +179,8 @@ void set_draw_positions(Point* grid_origin, Point* player_draw_pos)
      *     leaves the map in place */
 
     Point new_grid_origin = { // map point to be drawn at top left of matrix
-        player.pos.row - MAT_MID_ROW,
-        player.pos.col - MAT_MID_COL
+        player_pos.row - MAT_MID_ROW,
+        player_pos.col - MAT_MID_COL
     };
     Point new_grid_close = { // map point to be drawn at the bottom right of the matrix
         new_grid_origin.row + LEDMAT_ROWS_NUM - 1,
@@ -213,31 +212,23 @@ void set_draw_positions(Point* grid_origin, Point* player_draw_pos)
 }
 
 
-void update_map(const Point* origin)
+/*void update_map(const Point* origin)
 {
     for (int row = origin->row; row < origin->row + LEDMAT_ROWS_NUM; row++) {
         for (int col = origin->col; col < origin->col + LEDMAT_COLS_NUM; col++) {
             display_pixel_set(col - origin->col, row - origin->row, bitmap[row][col]);
         }
     }
-}
+}*/
 
-void game_init(Point* player_draw_pos, Point* grid_draw_origin)
+void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 {
-    set_draw_positions(player_draw_pos, grid_draw_origin);
+    set_draw_positions(player.pos, grid_draw_origin, player_draw_pos);
     update_map(grid_draw_origin);
 }
 
 
-void check_for_kill(Point* check_pos)
-{
-    if (player.pos.row == check_pos->row && player.pos.col == check_pos->col) {
-        led_set(LED1, 1);
-    }
-}
-
-
-void draw_shrapnel(Point* bomb_pos, Point* bomb_draw_pos)
+/*void draw_shrapnel(Point* bomb_pos, Point* bomb_draw_pos)
 {
     Point directions[5] = {
         {0, 0},
@@ -268,14 +259,14 @@ void draw_shrapnel(Point* bomb_pos, Point* bomb_draw_pos)
             grid_check_pos.col += j;
             if (bitmap[grid_check_pos.row][grid_check_pos.col] == 0) {
                 display_pixel_set(draw_pos.col, draw_pos.row, 1);
-                check_for_kill(&grid_check_pos);
+                //check_for_kill(&grid_check_pos);
             }
         }
     }
-}
+}*/
 
 
-void draw_bombs(Point* grid_origin)
+/*void draw_bombs(Point* grid_origin)
 {
     Point draw_pos = {0, 0};
     for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
@@ -293,32 +284,24 @@ void draw_bombs(Point* grid_origin)
             }
         }
     }
-}
+}*/
 
 int main (void)
 {
-
     system_init ();
     navswitch_init();
     pacer_init(PACER_HZ);
     display_init();
     ir_uart_init();
-    //tinygl_init(TINYGL_WIDTH * 300);
 
     Point player_draw_pos = {0, 0};
     Point grid_draw_origin = {0, 0}; // position of the top left LED on the LED matrix
-
 
     int player_flash_counter = 0;
     int player_flash = 1;
     bool input_registered = false;
 
-    char uart_info[3] = {0};
-
     bool player_chosen = false;
-
-    int uart_step = 0;
-    int uart_cycle_length = 8;//NUM_BOMBS / 2;
 
     while (!player_chosen) {
         navswitch_update();
@@ -343,11 +326,11 @@ int main (void)
         }
     }
 
-    set_draw_positions(&grid_draw_origin, &player_draw_pos);
-    update_map(&grid_draw_origin);
+    game_init(&grid_draw_origin, &player_draw_pos);
 
     char read_char = 0;
-    //char prev_read_char = 0;
+    Point pos_from_read = {0, 0};
+            
     while (1)
     {
         pacer_wait();
@@ -355,11 +338,11 @@ int main (void)
         input_registered = check_and_handle_input();
 
         if (input_registered) {
-            set_draw_positions(&grid_draw_origin, &player_draw_pos);
+            set_draw_positions(player.pos, &grid_draw_origin, &player_draw_pos);
             update_map(&grid_draw_origin);
         }
 
-        draw_bombs(&grid_draw_origin);
+        draw_bombs(&player.pos, &grid_draw_origin);
 
 
         if (player_flash_counter < PLAYER_FLASH_RATE) {
@@ -383,7 +366,6 @@ int main (void)
             }
         }
 
-        Point pos_from_read = {0, 0};
         if (ir_uart_read_ready_p()) {
             read_char = ir_uart_getc();
             //if (read_char == 'b') {

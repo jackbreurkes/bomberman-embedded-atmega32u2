@@ -3,13 +3,14 @@
  * NEEDED FOR ALL SOURCE FILES
  */
 
-#include "movement.h"
+#include "position.h"
 #include "player.h"
 #include <stdbool.h>
 
 #define PACER_HZ 300
 #define NUM_BOMBS 6
 #define BOMB_FUSE (PACER_HZ * 3) // fuse time in seconds
+#define SHRAPNEL_TIME (PACER_HZ * 0.3)
 
 typedef struct bomb_s {
     uint8_t active;
@@ -26,3 +27,9 @@ void bomb_at_pos(Point pos, Player* playerX, bool is_current_player);
 void drop_bomb(Point pos, Player* playerX);
 
 void enemy_bomb(Point pos, Player* playerX);
+
+void check_for_kill(Point* player_pos, Point* check_pos);
+
+void draw_shrapnel(Point* player_pos, Point* bomb_pos, Point* bomb_draw_pos);
+
+void draw_bombs(Point* player_pos, Point* grid_origin);

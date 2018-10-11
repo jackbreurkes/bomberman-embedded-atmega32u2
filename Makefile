@@ -16,16 +16,16 @@ all: game.out
 
 
 # Compile: create object files from C source files.
-game.o: game.c bomb.h movement.h player.h ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/navswitch.h ../../utils/tinygl.h ../../drivers/led.h ../../drivers/avr/ir_uart.h
+game.o: game.c bomb.h position.h player.h ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/navswitch.h ../../utils/tinygl.h ../../drivers/led.h ../../drivers/avr/ir_uart.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-movement.o: movement.c ../../drivers/avr/system.h movement.h
+position.o: position.c ../../drivers/avr/system.h position.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 player.o: player.c ../../drivers/avr/system.h player.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-bomb.o: bomb.c ../../drivers/avr/system.h movement.h player.h bomb.h
+bomb.o: bomb.c ../../drivers/avr/system.h position.h player.h bomb.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 system.o: ../../drivers/avr/system.c ../../drivers/avr/system.h
@@ -73,7 +73,7 @@ prescale.o: ../../drivers/avr/prescale.c ../../drivers/avr/prescale.h ../../driv
 
 
 # Link: create ELF output file from object files.
-game.out: game.o movement.o bomb.o player.o system.o pio.o pacer.o timer.o display.o ledmat.o navswitch.o tinygl.o font.o led.o ir_uart.o timer0.o usart1.o prescale.o
+game.out: game.o position.o bomb.o player.o system.o pio.o pacer.o timer.o display.o ledmat.o navswitch.o tinygl.o font.o led.o ir_uart.o timer0.o usart1.o prescale.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 
