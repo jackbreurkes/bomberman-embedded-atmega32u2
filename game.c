@@ -8,8 +8,6 @@
 #include "pacer.h"
 #include "display.h"
 #include "navswitch.h"
-#include "led.h"
-#include "ir_uart.h"
 #include <stdbool.h>
 
 #include "position.h"
@@ -159,8 +157,6 @@ bool check_and_handle_input(void)
         move_diff.col = 1; // move right one column
     }  else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
         drop_bomb(player.pos, &player);
-        char c = player.pos.row * MAP_COLS + player.pos.col;
-        ir_uart_putc(c);
     } else {
         input_registered = false;
     }
@@ -344,6 +340,7 @@ int main (void)
             update_map(&grid_draw_origin);
         }
 
+        read_bomb(&player);
         draw_bombs(&player.pos, &grid_draw_origin);
 
 
@@ -358,25 +355,6 @@ int main (void)
         display_pixel_set(player_draw_pos.col, player_draw_pos.row, player_flash);
 
         display_update();
-
-        uint8_t write_bomb_id = 0;
-        /*if (ir_uart_write_ready_p()) {
-            if (bombs[0].active && !bombs[0].transmitted) {
-                char c = bombs[0].pos.row * MAP_COLS + bombs[write_bomb_id].pos.col;
-                ir_uart_putc(c);
-                bombs[0].transmitted = true;
-            }
-        }*/
-
-        if (ir_uart_read_ready_p()) {
-            read_char = ir_uart_getc();
-            //if (read_char == 'b') {
-                pos_from_read.row = (read_char) / MAP_COLS;
-                pos_from_read.col = (read_char) % MAP_COLS;
-                enemy_bomb(pos_from_read, &player);
-            //}
-            //prev_read_char = read_char;
-        }
 
     }
 }

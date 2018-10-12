@@ -16,16 +16,16 @@ all: game.out
 
 
 # Compile: create object files from C source files.
-game.o: game.c bomb.h position.h player.h ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/navswitch.h ../../utils/tinygl.h ../../drivers/led.h ../../drivers/avr/ir_uart.h
+game.o: game.c bomb.h position.h player.h ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/navswitch.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-position.o: position.c ../../drivers/avr/system.h position.h
+position.o: position.c ../../drivers/avr/system.h ../../drivers/display.h position.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 player.o: player.c ../../drivers/avr/system.h player.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-bomb.o: bomb.c ../../drivers/avr/system.h position.h player.h bomb.h
+bomb.o: bomb.c ../../drivers/avr/system.h ../../drivers/display.h ../../drivers/led.h position.h player.h ../../drivers/avr/ir_uart.h bomb.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 system.o: ../../drivers/avr/system.c ../../drivers/avr/system.h

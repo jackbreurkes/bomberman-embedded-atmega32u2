@@ -1,8 +1,10 @@
 #include "position.h"
+#include "display.h"
 
 const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
 {
-	// 1s are walls, 0s are free space
+    // 1s are walls, 0s are free space
+    // ensure that MAP_ROWS * MAP_COLUMNS < 256
     {1,1,1,0,1,1,0,1,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,1,1,0,0,0,0,1,1,0,1},

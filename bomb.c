@@ -5,6 +5,9 @@
 #include "system.h"
 #include "position.h"
 #include "bomb.h"
+#include "ir_uart.h"
+#include "led.h"
+#include "display.h"
 #include <stdbool.h>
 
 Bomb bombs[NUM_BOMBS] = {
@@ -60,14 +63,30 @@ void bomb_at_pos(Point pos, Player* playerX, bool is_current_player) {
 }
 
 
+void transmit_bomb(Point pos)
+{
+    ir_uart_putc(pos.row * MAP_COLS + pos.col);
+}
+
 void drop_bomb(Point pos, Player* player) {
     bomb_at_pos(pos, player, 1);
-
-    //bombs[0].transmitted = true;
+    transmit_bomb(pos);
 }
 
 void enemy_bomb(Point pos, Player* player) {
     bomb_at_pos(pos, player, 0);
+}
+
+void read_bomb(Player* player)
+{
+    Point pos_from_read = {0, 0};
+    char read_char = 0;
+    if (ir_uart_read_ready_p()) {
+        read_char = ir_uart_getc();
+        pos_from_read.row = (read_char) / MAP_COLS;
+        pos_from_read.col = (read_char) % MAP_COLS;
+        enemy_bomb(pos_from_read, player);
+    }
 }
 
 void check_for_kill(Point* player_pos, Point* check_pos)
