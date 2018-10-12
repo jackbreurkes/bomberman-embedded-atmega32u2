@@ -43,7 +43,7 @@ bool check_and_handle_input(void)
     } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
         move_diff.col = 1; // move right one column
     }  else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-        drop_bomb(player.pos, &player);
+        enemy_bomb(player.pos);
     } else {
         input_registered = false;
     }
@@ -94,7 +94,6 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 
 int main (void)
 {
-
     Point player_draw_pos = {0, 0};
     Point grid_draw_origin = {0, 0}; // position of the top left LED on the LED matrix
 

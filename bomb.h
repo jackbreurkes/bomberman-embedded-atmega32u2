@@ -28,7 +28,7 @@ void transmit_bomb(Point pos);
 
 void drop_bomb(Point pos, Player* player);
 
-void enemy_bomb(Point pos, Player* player);
+void enemy_bomb(Point pos);
 
 void read_bomb(Player* player);
 
