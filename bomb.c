@@ -19,31 +19,30 @@ Bomb bombs[NUM_BOMBS] = {
     {0, 5, {0, 0}, BOMB_FUSE, true}
 };
 
-static uint8_t enemy_bomb_num = NUM_BOMBS / 2;
-
 
 void transmit_bomb(Point pos)
 {
     ir_uart_putc(pos.row * MAP_COLS + pos.col);
 }
 
-void drop_bomb(Point pos, Player* player) {
-    uint8_t bomb_num = player->current_bomb;
-    bombs[bomb_num].active = 1;
-    bombs[bomb_num].pos.row = pos.row;
-    bombs[bomb_num].pos.col = pos.col;
-    bombs[bomb_num].fuse = BOMB_FUSE;
-    bombs[bomb_num].transmitted = false;
-    if (bomb_num == NUM_BOMBS / 2 - 1) {
-        bomb_num = 0;
+static uint8_t player_bomb_num = 0;
+void drop_bomb(Point pos) {
+    bombs[player_bomb_num].active = 1;
+    bombs[player_bomb_num].pos.row = pos.row;
+    bombs[player_bomb_num].pos.col = pos.col;
+    bombs[player_bomb_num].fuse = BOMB_FUSE;
+    bombs[player_bomb_num].transmitted = false;
+    if (player_bomb_num == NUM_BOMBS / 2 - 1) {
+        player_bomb_num = 0;
     } else {
-        bomb_num++;
+        player_bomb_num++;
     }
-    player->current_bomb = bomb_num;
+    //player->current_bomb = bomb_num;
 
     transmit_bomb(pos);
 }
 
+static uint8_t enemy_bomb_num = NUM_BOMBS / 2;
 void enemy_bomb(Point pos) {
     //bomb_at_pos(pos, player, 0);
     bombs[enemy_bomb_num].active = 1;

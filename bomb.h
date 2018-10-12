@@ -26,7 +26,7 @@ void bomb_at_pos(Point pos, Player* playerX, bool is_current_player);
 
 void transmit_bomb(Point pos);
 
-void drop_bomb(Point pos, Player* player);
+void drop_bomb(Point pos);
 
 void enemy_bomb(Point pos);
 
