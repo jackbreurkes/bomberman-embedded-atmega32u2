@@ -43,7 +43,7 @@ bool check_and_handle_input(void)
     } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
         move_diff.col = 1; // move right one column
     }  else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-        enemy_bomb(player.pos);
+        drop_bomb(player.pos, &player);
     } else {
         input_registered = false;
     }
