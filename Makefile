@@ -22,7 +22,7 @@ game.o: game.c bomb.h position.h player.h ../../drivers/avr/system.h ../../drive
 position.o: position.c ../../drivers/avr/system.h ../../drivers/display.h position.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-player.o: player.c ../../drivers/avr/system.h player.h
+player.o: player.c ../../drivers/avr/system.h ../../drivers/display.h player.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 bomb.o: bomb.c ../../drivers/avr/system.h ../../drivers/display.h ../../drivers/led.h position.h player.h ../../drivers/avr/ir_uart.h bomb.h

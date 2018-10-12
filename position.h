@@ -1,5 +1,5 @@
-#ifndef MAP_H
-#define MAP_H
+#ifndef POSITION_H
+#define POSITION_H
 
 #include "system.h"
 

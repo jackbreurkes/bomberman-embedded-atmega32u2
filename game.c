@@ -18,10 +18,7 @@
 #define PACER_HZ 300
 
 
-#define PLAYER_FLASH_RATE 50
-
-
-static Player player = {0, {0, 0}, 0};
+static Player player = {0, {0, 0}};
 
 
 bool check_and_handle_input(void)
@@ -97,21 +94,15 @@ int main (void)
     Point player_draw_pos = {0, 0};
     Point grid_draw_origin = {0, 0}; // position of the top left LED on the LED matrix
 
-    int player_flash_counter = 0;
-    int player_flash = 1;
-    bool input_registered = false;
-
     game_init(&grid_draw_origin, &player_draw_pos);
 
-    char read_char = 0;
-    Point pos_from_read = {0, 0};
+    bool input_registered = false;
 
     while (1)
     {
         pacer_wait();
 
         input_registered = check_and_handle_input();
-
         if (input_registered) {
             set_draw_positions(player.pos, &grid_draw_origin, &player_draw_pos);
             update_map(&grid_draw_origin);
@@ -119,19 +110,8 @@ int main (void)
 
         read_bomb();
         draw_bombs(&player.pos, &grid_draw_origin);
-
-
-        if (player_flash_counter < PLAYER_FLASH_RATE) {
-            player_flash_counter++;
-        } else {
-            player_flash = !player_flash;
-            player_flash_counter = 0;
-        }
-
-
-        display_pixel_set(player_draw_pos.col, player_draw_pos.row, player_flash);
+        draw_player(&player_draw_pos);
 
         display_update();
-
     }
 }
