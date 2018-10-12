@@ -63,8 +63,6 @@ void bomb_at_pos(Point pos, Player* playerX, bool is_current_player) {
 void drop_bomb(Point pos, Player* player) {
     bomb_at_pos(pos, player, 1);
 
-    char c = pos.row * MAP_COLS + pos.col;
-    ir_uart_putc(c);
     //bombs[0].transmitted = true;
 }
 
