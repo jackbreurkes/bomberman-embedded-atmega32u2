@@ -20,47 +20,6 @@ Bomb bombs[NUM_BOMBS] = {
 };
 
 static uint8_t enemy_bomb_num = NUM_BOMBS / 2;
-void bomb_at_pos(Point pos, Player* playerX, bool is_current_player) {
-    if (is_current_player) {
-        uint8_t bomb_num = playerX->current_bomb;
-        bombs[bomb_num].active = 1;
-        bombs[bomb_num].pos.row = pos.row;
-        bombs[bomb_num].pos.col = pos.col;
-        bombs[bomb_num].fuse = BOMB_FUSE;
-        bombs[bomb_num].transmitted = false;
-        //if (playerX->num == 1 && bomb_num == NUM_BOMBS / 2 - 1) {
-        if (bomb_num == NUM_BOMBS / 2 - 1) {
-            bomb_num = 0;
-        //} else if (playerX->num == 2 && bomb_num == NUM_BOMBS - 1) {
-          //  bomb_num = NUM_BOMBS / 2;
-        } else {
-            bomb_num++;
-        }
-        playerX->current_bomb = bomb_num;
-    } else {
-        /*if (playerX->num == 1) {
-            bombs[enemy_bomb_num + (NUM_BOMBS / 2)].active = 1;
-            bombs[enemy_bomb_num + (NUM_BOMBS / 2)].pos.row = pos.row;
-            bombs[enemy_bomb_num + (NUM_BOMBS / 2)].pos.col = pos.col;
-            bombs[enemy_bomb_num + (NUM_BOMBS / 2)].fuse = BOMB_FUSE;
-        } else {
-            bombs[enemy_bomb_num].active = 1;
-            bombs[enemy_bomb_num].pos.row = pos.row;
-            bombs[enemy_bomb_num].pos.col = pos.col;
-            bombs[enemy_bomb_num].fuse = BOMB_FUSE;
-        }*/
-        bombs[enemy_bomb_num].active = 1;
-        bombs[enemy_bomb_num].pos.row = pos.row;
-        bombs[enemy_bomb_num].pos.col = pos.col;
-        bombs[enemy_bomb_num].fuse = BOMB_FUSE;
-        if (enemy_bomb_num < NUM_BOMBS - 1) {
-            enemy_bomb_num++;
-        } else {
-            enemy_bomb_num = NUM_BOMBS / 2;
-        }
-        //enemy_bomb_num = (enemy_bomb_num + 1) % (NUM_BOMBS / 2);
-    }
-}
 
 
 void transmit_bomb(Point pos)
@@ -69,15 +28,36 @@ void transmit_bomb(Point pos)
 }
 
 void drop_bomb(Point pos, Player* player) {
-    bomb_at_pos(pos, player, 1);
+    uint8_t bomb_num = player->current_bomb;
+    bombs[bomb_num].active = 1;
+    bombs[bomb_num].pos.row = pos.row;
+    bombs[bomb_num].pos.col = pos.col;
+    bombs[bomb_num].fuse = BOMB_FUSE;
+    bombs[bomb_num].transmitted = false;
+    if (bomb_num == NUM_BOMBS / 2 - 1) {
+        bomb_num = 0;
+    } else {
+        bomb_num++;
+    }
+    player->current_bomb = bomb_num;
+
     transmit_bomb(pos);
 }
 
-void enemy_bomb(Point pos, Player* player) {
-    bomb_at_pos(pos, player, 0);
+void enemy_bomb(Point pos) {
+    //bomb_at_pos(pos, player, 0);
+    bombs[enemy_bomb_num].active = 1;
+    bombs[enemy_bomb_num].pos.row = pos.row;
+    bombs[enemy_bomb_num].pos.col = pos.col;
+    bombs[enemy_bomb_num].fuse = BOMB_FUSE;
+    if (enemy_bomb_num < NUM_BOMBS - 1) {
+        enemy_bomb_num++;
+    } else {
+        enemy_bomb_num = NUM_BOMBS / 2;
+    }
 }
 
-void read_bomb(Player* player)
+void read_bomb(void)
 {
     Point pos_from_read = {0, 0};
     char read_char = 0;
@@ -85,7 +65,7 @@ void read_bomb(Player* player)
         read_char = ir_uart_getc();
         pos_from_read.row = (read_char) / MAP_COLS;
         pos_from_read.col = (read_char) % MAP_COLS;
-        enemy_bomb(pos_from_read, player);
+        enemy_bomb(pos_from_read);
     }
 }
 
