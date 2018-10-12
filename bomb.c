@@ -44,7 +44,7 @@ void drop_bomb(Point pos, Player* player) {
     transmit_bomb(pos);
 }
 
-void enemy_bomb(Point pos) {
+void enemy_bomb(Point pos, Player* player) {
     //bomb_at_pos(pos, player, 0);
     bombs[enemy_bomb_num].active = 1;
     bombs[enemy_bomb_num].pos.row = pos.row;
@@ -57,7 +57,7 @@ void enemy_bomb(Point pos) {
     }
 }
 
-void read_bomb(void)
+void read_bomb(Player* player)
 {
     Point pos_from_read = {0, 0};
     char read_char = 0;
@@ -65,7 +65,7 @@ void read_bomb(void)
         read_char = ir_uart_getc();
         pos_from_read.row = (read_char) / MAP_COLS;
         pos_from_read.col = (read_char) % MAP_COLS;
-        enemy_bomb(pos_from_read);
+        enemy_bomb(pos_from_read, player);
     }
 }
 
