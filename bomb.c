@@ -117,6 +117,7 @@ void draw_shrapnel(Point* player_pos, Point* bomb_pos, Point* bomb_draw_pos)
 
 void draw_bombs(Point* player_pos, Point* grid_origin)
 {
+    update_map(grid_origin);
     Point draw_pos = {0, 0};
     for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
         if (bombs[bomb].active == 1) {
@@ -128,7 +129,6 @@ void draw_bombs(Point* player_pos, Point* grid_origin)
             } else if (bombs[bomb].fuse > -SHRAPNEL_TIME) {
                 draw_shrapnel(player_pos, &bombs[bomb].pos, &draw_pos);
             } else {
-                update_map(grid_origin);
                 bombs[bomb].active = 0;
             }
         }
