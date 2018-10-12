@@ -117,7 +117,7 @@ int main (void)
             update_map(&grid_draw_origin);
         }
 
-        read_bomb(&player);
+        read_bomb();
         draw_bombs(&player.pos, &grid_draw_origin);
 
 

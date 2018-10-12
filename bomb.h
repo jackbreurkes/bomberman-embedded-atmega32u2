@@ -30,7 +30,7 @@ void drop_bomb(Point pos, Player* player);
 
 void enemy_bomb(Point pos);
 
-void read_bomb(Player* player);
+void read_bomb(void);
 
 void check_for_kill(Point* player_pos, Point* check_pos);
 

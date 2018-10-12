@@ -57,7 +57,7 @@ void enemy_bomb(Point pos) {
     }
 }
 
-void read_bomb(Player* player)
+void read_bomb(void)
 {
     Point pos_from_read = {0, 0};
     char read_char = 0;
