@@ -2,7 +2,7 @@
 #define PLAYER_H
 
 #include "system.h"
-#include "position.h"
+#include "setup.h"
 
 #define PLAYER_FLASH_RATE 50
 

@@ -1,6 +1,7 @@
 /*
- * BANNER EXPLAINING FILE INFO
- * NEEDED FOR ALL SOURCE FILES
+ * Module for main Bomberman game functionality
+ * Jack van Heugten Breurkes -- 23859472
+ * Abhishek Kasera -- 
  */
 
 #include "system.h"
@@ -11,21 +12,18 @@
 #include "ir_uart.h"
 #include <stdbool.h>
 
-#include "position.h"
+#include "setup.h"
 #include "player.h"
 #include "bomb.h"
-
-#define PACER_HZ 300
 
 
 static Player player = {0, {0, 0}};
 
 
 bool check_and_handle_input(void)
+/* checks for input and runs functions associated with input
+ * returns true if input is detected or false otherwise */
 {
-    /* checks for input and runs functions associated with input
-     * returns true if input is detected or false otherwise
-     */
     bool input_registered = true;
     Point move_diff = {0, 0};
 
@@ -54,12 +52,16 @@ bool check_and_handle_input(void)
 
 
 void game_init(Point* grid_draw_origin, Point* player_draw_pos)
+/* runs initialise functions for modules and ensures that one player
+ * is player 1 and the other is player 2 */
 {
     system_init ();
     navswitch_init();
     pacer_init(PACER_HZ);
     display_init();
     ir_uart_init();
+    
+    display_pixel_set(LEDMAT_COLS_NUM / 2, LEDMAT_ROWS_NUM / 2, 1);
 
     bool player_chosen = false;
 
@@ -82,6 +84,8 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
                 player_chosen = true;
             }
         }
+        
+        display_update();
     }
 
     set_draw_positions(player.pos, grid_draw_origin, player_draw_pos);
@@ -92,11 +96,12 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 int main (void)
 {
     Point player_draw_pos = {0, 0};
-    Point grid_draw_origin = {0, 0}; // position of the top left LED on the LED matrix
+    Point grid_draw_origin = {0, 0}; // bitmap position drawn at top left
 
     game_init(&grid_draw_origin, &player_draw_pos);
 
     bool input_registered = false;
+    //bool is_dead = false;
 
     while (1)
     {
@@ -109,7 +114,9 @@ int main (void)
         }
 
         read_bomb();
+        //is_dead = draw_bombs(&player.pos, &grid_draw_origin);
         draw_bombs(&player.pos, &grid_draw_origin);
+        
         draw_player(&player_draw_pos);
 
         display_update();

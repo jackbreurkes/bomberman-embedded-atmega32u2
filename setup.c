@@ -1,4 +1,11 @@
-#include "position.h"
+/*
+ * Module for handling map and positioning in Bomberman game
+ * Jack van Heugten Breurkes -- 23859472
+ * Abhishek Kasera -- 
+ */
+
+
+#include "setup.h"
 #include "display.h"
 
 const uint8_t bitmap[MAP_ROWS][MAP_COLS] =

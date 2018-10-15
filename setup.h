@@ -9,6 +9,9 @@
 #define MAT_MID_ROW (LEDMAT_ROWS_NUM / 2)
 #define MAT_MID_COL (LEDMAT_COLS_NUM / 2)
 
+#define PACER_HZ 300
+
+
 typedef struct point_s {
     int8_t row;
     int8_t col;
