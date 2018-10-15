@@ -1,15 +1,16 @@
 /*
  * Module for main Bomberman game functionality
  * Jack van Heugten Breurkes -- 23859472
- * Abhishek Kasera -- 
+ * Abhishek Kasera -- XXXXXXXX
  */
 
 #include "system.h"
-#include "pio.h"
 #include "pacer.h"
 #include "display.h"
 #include "navswitch.h"
 #include "ir_uart.h"
+#include "tinygl.h"
+#include "../fonts/font5x7_1.h"
 #include <stdbool.h>
 
 #include "setup.h"
@@ -53,19 +54,28 @@ bool check_and_handle_input(void)
 
 void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 /* runs initialise functions for modules and ensures that one player
- * is player 1 and the other is player 2 */
+ * is player 1 and the other is player 2. Then initialises draw
+ * positions for when the players load into the game */
 {
     system_init ();
     navswitch_init();
     pacer_init(PACER_HZ);
+    tinygl_init(PACER_HZ);
     display_init();
     ir_uart_init();
+    reset_bombs();
     
-    display_pixel_set(LEDMAT_COLS_NUM / 2, LEDMAT_ROWS_NUM / 2, 1);
-
+    tinygl_font_set (&font5x7_1);
+    tinygl_text_speed_set(12);
+    tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
+    tinygl_text("PRESS NAVSWITCH ");
+    
     bool player_chosen = false;
 
     while (!player_chosen) {
+		
+		pacer_wait();
+		
         navswitch_update();
 
         if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
@@ -84,8 +94,8 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
                 player_chosen = true;
             }
         }
-        
-        display_update();
+
+        tinygl_update();
     }
 
     set_draw_positions(player.pos, grid_draw_origin, player_draw_pos);
@@ -93,7 +103,8 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 }
 
 
-int main (void)
+int main(void)
+/* main game */
 {
     Point player_draw_pos = {0, 0};
     Point grid_draw_origin = {0, 0}; // bitmap position drawn at top left
@@ -101,10 +112,8 @@ int main (void)
     game_init(&grid_draw_origin, &player_draw_pos);
 
     bool input_registered = false;
-    //bool is_dead = false;
 
-    while (1)
-    {
+    while (1) {
         pacer_wait();
 
         input_registered = check_and_handle_input();
@@ -114,11 +123,11 @@ int main (void)
         }
 
         read_bomb();
-        //is_dead = draw_bombs(&player.pos, &grid_draw_origin);
         draw_bombs(&player.pos, &grid_draw_origin);
         
         draw_player(&player_draw_pos);
 
         display_update();
     }
+
 }

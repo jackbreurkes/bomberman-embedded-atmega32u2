@@ -4,7 +4,7 @@
 #include "system.h"
 #include "setup.h"
 
-#define PLAYER_FLASH_RATE 50
+#define PLAYER_FLASH_RATE (PACER_HZ * 0.15)
 
 typedef struct player_s {
     uint8_t num;

@@ -1,7 +1,7 @@
 /*
  * Module for implementing player functionality in bomberman game
  * Jack van Heugten Breurkes -- 23859472
- * Abhishek Kasera -- 
+ * Abhishek Kasera -- XXXXXXXX
  */
 
 
@@ -12,6 +12,8 @@
 
 
 void move_player_by(Point diff, Player* player)
+/* moves the player by diff if the corresponding position is free
+ * otherwise the player's position does not change */
 {
     Point new_pos = {player->pos.row + diff.row, player->pos.col + diff.col};
 
@@ -30,6 +32,8 @@ void move_player_by(Point diff, Player* player)
 static uint16_t player_flash_counter = 0;
 static bool flash_state = 0;
 void draw_player(Point* draw_pos)
+/* draws the player at the correct position on the led matrix
+ * flashes the player's LED at the desired rate */
 {
     if (player_flash_counter < PLAYER_FLASH_RATE) {
         player_flash_counter++;

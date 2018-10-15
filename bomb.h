@@ -7,14 +7,15 @@
 #define SHRAPNEL_TIME (PACER_HZ * 0.3)
 
 typedef struct bomb_s {
-    uint8_t active;
+    bool active;
     uint8_t bomb_id;
     Point pos;
     int16_t fuse;
-    bool transmitted;
 } Bomb;
 
 extern Bomb bombs[NUM_BOMBS];
+
+void reset_bombs(void);
 
 void transmit_bomb(Point pos);
 

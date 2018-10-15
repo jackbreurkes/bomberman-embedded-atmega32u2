@@ -1,7 +1,7 @@
 /*
  * Module for handling map and positioning in Bomberman game
  * Jack van Heugten Breurkes -- 23859472
- * Abhishek Kasera -- 
+ * Abhishek Kasera -- XXXXXXXX
  */
 
 
@@ -10,18 +10,18 @@
 
 const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
 {
-    // 1s are walls, 0s are free space
-    // ensure that MAP_ROWS * MAP_COLUMNS < 256
-    {1,1,1,0,1,1,0,1,1,1,1,1},
+    /* 1s are walls, 0s are free space
+    NOTE: ensure that MAP_ROWS * MAP_COLS < 256 */
+    {1,1,1,1,1,1,1,1,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,1,1,0,0,0,0,1,1,0,1},
-    {1,0,0,0,0,1,1,0,1,1,0,1},
-    {1,0,1,1,0,1,1,0,0,0,0,0},
-    {0,0,0,0,0,1,1,0,0,0,0,1},
-    {1,0,1,1,0,1,1,0,1,1,0,1},
+    {1,0,1,0,0,1,0,0,1,1,0,1},
+    {1,0,1,1,0,1,1,0,0,0,0,1},
+    {0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,1,0,1,1,0,1,1,0,1},
     {1,0,1,1,0,0,0,0,1,1,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,1},
-    {1,1,1,1,1,1,0,1,1,1,1,1}
+    {1,0,1,0,0,1,1,0,0,0,0,1},
+    {1,1,1,1,1,1,1,1,1,1,1,1}
 };
 
 
@@ -67,6 +67,7 @@ void set_draw_positions(const Point player_pos, Point* grid_origin, Point* playe
 
 
 void update_map(const Point* origin)
+/* updates the section on the map that is displayed on the LED matrix */
 {
     for (int row = origin->row; row < origin->row + LEDMAT_ROWS_NUM; row++) {
         for (int col = origin->col; col < origin->col + LEDMAT_COLS_NUM; col++) {

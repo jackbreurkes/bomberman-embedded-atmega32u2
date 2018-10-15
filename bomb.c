@@ -1,7 +1,7 @@
 /*
  * Module for implementing bomb functionality in bomberman game
  * Jack van Heugten Breurkes -- 23859472
- * Abhishek Kasera -- 
+ * Abhishek Kasera -- XXXXXXXX
  */
 
 
@@ -16,14 +16,25 @@
  * the first half are assigned to the current player
  * the second half are assigned to the opponent */
 Bomb bombs[NUM_BOMBS] = {
-    {0, 0, {0, 0}, BOMB_FUSE, true},
-    {0, 1, {0, 0}, BOMB_FUSE, true},
-    {0, 2, {0, 0}, BOMB_FUSE, true},
-    {0, 3, {0, 0}, BOMB_FUSE, true},
-    {0, 4, {0, 0}, BOMB_FUSE, true},
-    {0, 5, {0, 0}, BOMB_FUSE, true}
+    {0, 0, {0, 0}, BOMB_FUSE},
+    {0, 1, {0, 0}, BOMB_FUSE},
+    {0, 2, {0, 0}, BOMB_FUSE},
+    {0, 3, {0, 0}, BOMB_FUSE},
+    {0, 4, {0, 0}, BOMB_FUSE},
+    {0, 5, {0, 0}, BOMB_FUSE}
 };
 
+
+void reset_bombs(void)
+/* initialises the bombs to their initial states */
+{
+	for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
+		bombs[bomb].active = 0;
+		bombs[bomb].pos.row = 0;
+		bombs[bomb].pos.col = 0;
+		bombs[bomb].fuse = BOMB_FUSE;
+	}
+}
 
 
 void transmit_bomb(Point pos)
@@ -42,7 +53,6 @@ void drop_bomb(Point pos)
     bombs[player_bomb_num].pos.row = pos.row;
     bombs[player_bomb_num].pos.col = pos.col;
     bombs[player_bomb_num].fuse = BOMB_FUSE;
-    bombs[player_bomb_num].transmitted = false;
     if (player_bomb_num == NUM_BOMBS / 2 - 1) {
         player_bomb_num = 0;
     } else {

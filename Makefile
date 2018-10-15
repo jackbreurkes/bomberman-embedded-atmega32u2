@@ -16,7 +16,7 @@ all: game.out
 
 
 # Compile: create object files from C source files.
-game.o: game.c bomb.h setup.h player.h ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/avr/ir_uart.h ../../drivers/navswitch.h
+game.o: game.c bomb.h setup.h player.h ../../drivers/avr/system.h ../../drivers/avr/pio.h ../../utils/pacer.h ../../drivers/display.h ../../drivers/avr/ir_uart.h ../../drivers/navswitch.h ../../fonts/font5x7_1.h ../../utils/font.h ../../utils/tinygl.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 setup.o: setup.c ../../drivers/avr/system.h ../../drivers/display.h setup.h
@@ -60,11 +60,17 @@ usart1.o: ../../drivers/avr/usart1.c ../../drivers/avr/system.h ../../drivers/av
 
 prescale.o: ../../drivers/avr/prescale.c ../../drivers/avr/prescale.h ../../drivers/avr/system.h
 	$(CC) -c $(CFLAGS) $< -o $@
+	
+tinygl.o: ../../utils/tinygl.c ../../drivers/avr/system.h ../../drivers/display.h ../../utils/font.h ../../utils/tinygl.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+font.o: ../../utils/font.c ../../drivers/avr/system.h ../../utils/font.h
+	$(CC) -c $(CFLAGS) $< -o $@
 
 
 
 # Link: create ELF output file from object files.
-game.out: game.o setup.o bomb.o player.o system.o pio.o pacer.o timer.o display.o ledmat.o navswitch.o ir_uart.o timer0.o usart1.o prescale.o
+game.out: game.o setup.o bomb.o player.o system.o pio.o pacer.o timer.o display.o ledmat.o navswitch.o ir_uart.o timer0.o usart1.o prescale.o tinygl.o font.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 
