@@ -103,7 +103,7 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 }
 
 
-int main(void)
+void play_bomberman(void)
 /* main game */
 {
     Point player_draw_pos = {0, 0};
@@ -112,8 +112,10 @@ int main(void)
     game_init(&grid_draw_origin, &player_draw_pos);
 
     bool input_registered = false;
+    bool is_dead = false;
 
-    while (1) {
+
+    while (!is_dead) {
         pacer_wait();
 
         input_registered = check_and_handle_input();
@@ -123,11 +125,27 @@ int main(void)
         }
 
         read_bomb();
-        draw_bombs(&player.pos, &grid_draw_origin);
+        is_dead = draw_bombs(&player.pos, &grid_draw_origin);
 
         draw_player(&player_draw_pos);
 
         display_update();
     }
 
+    tinygl_text("GAME OVER ");
+
+    input_registered = false;
+    while (!input_registered) {
+        pacer_wait();
+        input_registered = check_and_handle_input();
+        tinygl_update();
+    }
+}
+
+
+int main(void)
+{
+    while (1) {
+        play_bomberman();
+    }
 }
