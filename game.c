@@ -1,7 +1,7 @@
 /*
  * Module for main Bomberman game functionality
  * Jack van Heugten Breurkes -- 23859472
- * Abhishek Kasera -- XXXXXXXX
+ * Abhishek Kasera -- 43353168
  */
 
 #include "system.h"
@@ -64,18 +64,18 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
     display_init();
     ir_uart_init();
     reset_bombs();
-    
+
     tinygl_font_set (&font5x7_1);
     tinygl_text_speed_set(12);
     tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
     tinygl_text("PRESS NAVSWITCH ");
-    
+
     bool player_chosen = false;
 
     while (!player_chosen) {
-		
-		pacer_wait();
-		
+
+        pacer_wait();
+
         navswitch_update();
 
         if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
@@ -124,7 +124,7 @@ int main(void)
 
         read_bomb();
         draw_bombs(&player.pos, &grid_draw_origin);
-        
+
         draw_player(&player_draw_pos);
 
         display_update();

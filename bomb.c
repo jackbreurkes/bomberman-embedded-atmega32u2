@@ -1,7 +1,7 @@
 /*
  * Module for implementing bomb functionality in bomberman game
  * Jack van Heugten Breurkes -- 23859472
- * Abhishek Kasera -- XXXXXXXX
+ * Abhishek Kasera -- 43353168
  */
 
 
@@ -28,12 +28,12 @@ Bomb bombs[NUM_BOMBS] = {
 void reset_bombs(void)
 /* initialises the bombs to their initial states */
 {
-	for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
-		bombs[bomb].active = 0;
-		bombs[bomb].pos.row = 0;
-		bombs[bomb].pos.col = 0;
-		bombs[bomb].fuse = BOMB_FUSE;
-	}
+    for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
+        bombs[bomb].active = 0;
+        bombs[bomb].pos.row = 0;
+        bombs[bomb].pos.col = 0;
+        bombs[bomb].fuse = BOMB_FUSE;
+    }
 }
 
 
@@ -101,14 +101,14 @@ bool check_for_bomb(Point check_pos)
 /* checks if there is an active bomb at the position defined by
  * check_pos */
 {
-	bool point_has_bomb = false;
-	for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
-		if (bombs[bomb].active) {
-			point_has_bomb = bombs[bomb].pos.row == check_pos.row
-						     && bombs[bomb].pos.col == check_pos.col;
-		}
-	}
-	return point_has_bomb;
+    bool point_has_bomb = false;
+    for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
+        if (bombs[bomb].active) {
+            point_has_bomb = bombs[bomb].pos.row == check_pos.row
+                             && bombs[bomb].pos.col == check_pos.col;
+        }
+    }
+    return point_has_bomb;
 }
 
 
