@@ -132,7 +132,7 @@ void play_bomberman(void)
         display_update();
     }
 
-    tinygl_text("GAME OVER ");
+    tinygl_text(" GAME OVER");
 
     input_registered = false;
     while (!input_registered) {
