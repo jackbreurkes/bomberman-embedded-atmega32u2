@@ -62,7 +62,6 @@ void set_draw_positions(const Point player_pos, Point* grid_origin, Point* playe
     } else {
         grid_origin->col = new_grid_origin.col;
     }
-
 }
 
 

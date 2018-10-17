@@ -60,7 +60,7 @@ usart1.o: ../../drivers/avr/usart1.c ../../drivers/avr/system.h ../../drivers/av
 
 prescale.o: ../../drivers/avr/prescale.c ../../drivers/avr/prescale.h ../../drivers/avr/system.h
 	$(CC) -c $(CFLAGS) $< -o $@
-	
+
 tinygl.o: ../../utils/tinygl.c ../../drivers/avr/system.h ../../drivers/display.h ../../utils/font.h ../../utils/tinygl.h
 	$(CC) -c $(CFLAGS) $< -o $@
 

@@ -17,6 +17,9 @@
 #include "player.h"
 #include "bomb.h"
 
+#define TINYGL_TEXT_SPEED 20
+#define INPUT_LOCK_TIME (PACER_HZ * 5)
+
 
 static Player player = {0, {0, 0}};
 
@@ -53,8 +56,8 @@ bool check_and_handle_input(void)
 
 
 void game_init(Point* grid_draw_origin, Point* player_draw_pos)
-/* runs initialise functions for modules and ensures that one player
- * is player 1 and the other is player 2. Then initialises draw
+/* runs initialise functions for modules and ensures that players
+ * begin the game on opposite sides of the map. Then initialises draw
  * positions for when the players load into the game */
 {
     system_init ();
@@ -66,7 +69,7 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
     reset_bombs();
 
     tinygl_font_set (&font5x7_1);
-    tinygl_text_speed_set(12);
+    tinygl_text_speed_set(TINYGL_TEXT_SPEED);
     tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
     tinygl_text("PRESS NAVSWITCH ");
 
@@ -103,8 +106,13 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 }
 
 
+
+
 void play_bomberman(void)
-/* main game */
+/* runs the main game once
+ * sets the game up, then runs the main game until the player is dead
+ * then displays game over message and returns if the player touches
+ * the navswitch (i.e. wants to play again). */
 {
     Point player_draw_pos = {0, 0};
     Point grid_draw_origin = {0, 0}; // bitmap position drawn at top left
@@ -113,6 +121,8 @@ void play_bomberman(void)
 
     bool input_registered = false;
     bool is_dead = false;
+
+    uint16_t input_lock_timer = 0;
 
 
     while (!is_dead) {
@@ -135,15 +145,21 @@ void play_bomberman(void)
     tinygl_text(" GAME OVER");
 
     input_registered = false;
+    input_lock_timer = 0;
     while (!input_registered) {
         pacer_wait();
-        input_registered = check_and_handle_input();
+        if (input_lock_timer > INPUT_LOCK_TIME) {
+            input_registered = check_and_handle_input();
+        } else {
+            input_lock_timer++;
+        }
         tinygl_update();
     }
 }
 
 
 int main(void)
+/* starts the game, plays until it is finished then restarts it */
 {
     while (1) {
         play_bomberman();
