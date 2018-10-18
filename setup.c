@@ -8,10 +8,11 @@
 #include "setup.h"
 #include "display.h"
 
+/** bitmap laying out the map of the game
+    1s are walls, 0s are free space
+    NOTE: ensure that MAP_ROWS * MAP_COLS < 256 for representing points using chars */
 const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
 {
-    /* 1s are walls, 0s are free space
-    NOTE: ensure that MAP_ROWS * MAP_COLS < 256 */
     {1,1,1,1,1,1,1,1,1,1,1,1},
     {1,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,1,1,0,0,0,0,1,1,0,1},
@@ -25,13 +26,12 @@ const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
 };
 
 
+/* updates the map's draw origin if the map can be drawn with the
+ *     player in the center
+ * otherwise updates the player's position on the screen and
+ *     leaves the map in place */
 void set_draw_positions(const Point player_pos, Point* grid_origin, Point* player_draw_pos)
 {
-    /* updates the map's draw origin if the map can be drawn with the
-     *     player in the center
-     * otherwise updates the player's position on the screen and
-     *     leaves the map in place */
-
     Point new_grid_origin = { // map point to be drawn at top left of matrix
         player_pos.row - MAT_MID_ROW,
         player_pos.col - MAT_MID_COL
@@ -64,9 +64,8 @@ void set_draw_positions(const Point player_pos, Point* grid_origin, Point* playe
     }
 }
 
-
+/* updates the section of the map that is displayed on the LED matrix */
 void update_map(const Point* origin)
-/* updates the section on the map that is displayed on the LED matrix */
 {
     for (int row = origin->row; row < origin->row + LEDMAT_ROWS_NUM; row++) {
         for (int col = origin->col; col < origin->col + LEDMAT_COLS_NUM; col++) {

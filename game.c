@@ -24,9 +24,9 @@
 static Player player = {0, {0, 0}};
 
 
-bool check_and_handle_input(void)
 /* checks for input and runs functions associated with input
  * returns true if input is detected or false otherwise */
+bool check_and_handle_input(void)
 {
     bool input_registered = true;
     Point move_diff = {0, 0};
@@ -55,10 +55,10 @@ bool check_and_handle_input(void)
 }
 
 
-void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 /* runs initialise functions for modules and ensures that players
  * begin the game on opposite sides of the map. Then initialises draw
  * positions for when the players load into the game */
+void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 {
     system_init ();
     navswitch_init();
@@ -83,7 +83,6 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 
         if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
             ir_uart_putc('p');
-            player.num = 1;
             player.pos.row = 1;
             player.pos.col = 1;
             player_chosen = true;
@@ -91,7 +90,6 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 
         if (ir_uart_read_ready_p()) {
             if (ir_uart_getc() == 'p') {
-                player.num = 2;
                 player.pos.row = MAP_ROWS - 2;
                 player.pos.col = MAP_COLS - 2;
                 player_chosen = true;
@@ -107,12 +105,11 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 
 
 
-
-void play_bomberman(void)
 /* runs the main game once
  * sets the game up, then runs the main game until the player is dead
  * then displays game over message and returns if the player touches
  * the navswitch (i.e. wants to play again). */
+void play_bomberman(void)
 {
     Point player_draw_pos = {0, 0};
     Point grid_draw_origin = {0, 0}; // bitmap position drawn at top left
@@ -135,9 +132,9 @@ void play_bomberman(void)
         }
 
         read_bomb();
-        is_dead = draw_bombs(&player.pos, &grid_draw_origin);
+        is_dead = draw_bombs(player.pos, grid_draw_origin);
 
-        draw_player(&player_draw_pos);
+        draw_player(player_draw_pos);
 
         display_update();
     }
@@ -158,8 +155,8 @@ void play_bomberman(void)
 }
 
 
-int main(void)
 /* starts the game, plays until it is finished then restarts it */
+int main(void)
 {
     while (1) {
         play_bomberman();

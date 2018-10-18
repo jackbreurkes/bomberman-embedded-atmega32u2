@@ -25,8 +25,8 @@ Bomb bombs[NUM_BOMBS] = {
 };
 
 
-void reset_bombs(void)
 /* initialises the bombs to their initial states */
+void reset_bombs(void)
 {
     for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
         bombs[bomb].active = 0;
@@ -37,18 +37,18 @@ void reset_bombs(void)
 }
 
 
-void transmit_bomb(Point pos)
 /* transmits a position to the opponent's board via a unique integer */
+void transmit_bomb(const Point pos)
 {
     ir_uart_putc(pos.row * MAP_COLS + pos.col);
 }
 
 
-
-static uint8_t player_bomb_num = 0;
-void drop_bomb(Point pos)
 /* places a player bomb at the given position */
+void drop_bomb(const Point pos)
 {
+	static uint8_t player_bomb_num = 0;
+	
     bombs[player_bomb_num].active = 1;
     bombs[player_bomb_num].pos.row = pos.row;
     bombs[player_bomb_num].pos.col = pos.col;
@@ -58,17 +58,16 @@ void drop_bomb(Point pos)
     } else {
         player_bomb_num++;
     }
-    //player->current_bomb = bomb_num;
 
     transmit_bomb(pos);
 }
 
 
-
-static uint8_t enemy_bomb_num = NUM_BOMBS / 2;
-void enemy_bomb(Point pos)
 /* places an enemy bomb at the given position */
+void enemy_bomb(const Point pos)
 {
+	static uint8_t enemy_bomb_num = NUM_BOMBS / 2;
+	
     bombs[enemy_bomb_num].active = 1;
     bombs[enemy_bomb_num].pos.row = pos.row;
     bombs[enemy_bomb_num].pos.col = pos.col;
@@ -81,9 +80,8 @@ void enemy_bomb(Point pos)
 }
 
 
-
-void read_bomb(void)
 /* reads the position of an enemy bomb transmitted via infrared signal */
+void read_bomb(void)
 {
     Point pos_from_read = {0, 0};
     char read_char = 0;
@@ -96,10 +94,9 @@ void read_bomb(void)
 }
 
 
-
-bool check_for_bomb(Point check_pos)
 /* checks if there is an active bomb at the position defined by
  * check_pos */
+bool check_for_bomb(const Point check_pos)
 {
     bool point_has_bomb = false;
     for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
@@ -112,20 +109,9 @@ bool check_for_bomb(Point check_pos)
 }
 
 
-
-void check_for_kill(Point* player_pos, Point* check_pos, bool* is_dead)
-/* checks if the player is at the position defined by check_pos */
-{
-    if (player_pos->row == check_pos->row && player_pos->col == check_pos->col) {
-        *is_dead = true;
-    }
-}
-
-
-
-void draw_shrapnel(Point* player_pos, Point* bomb_pos, Point* bomb_draw_pos, bool* is_dead)
 /* draws the shrapnel around the exploding bomb and checks if the
  * player has been killed by it */
+bool draw_shrapnel(const Point player_pos, const Point bomb_pos, const Point bomb_draw_pos)
 {
     Point directions[5] = {
         {0, 0},
@@ -138,49 +124,50 @@ void draw_shrapnel(Point* player_pos, Point* bomb_pos, Point* bomb_draw_pos, boo
     Point grid_check_pos = {0, 0};
     int i = 0;
     int j = 0;
+    bool is_dead = false;
 
     for (int dir = 0; dir < 5; dir++) {
         i = directions[dir].row;
         j = directions[dir].col;
-        draw_pos.row = bomb_draw_pos->row + i;
-        draw_pos.col = bomb_draw_pos->col + j;
-        grid_check_pos.row = bomb_pos->row + i;
-        grid_check_pos.col = bomb_pos->col + j;
+        draw_pos.row = bomb_draw_pos.row + i;
+        draw_pos.col = bomb_draw_pos.col + j;
+        grid_check_pos.row = bomb_pos.row + i;
+        grid_check_pos.col = bomb_pos.col + j;
 
         if (bitmap[grid_check_pos.row][grid_check_pos.col] == 0) {
             display_pixel_set(draw_pos.col, draw_pos.row, 1);
-            check_for_kill(player_pos, &grid_check_pos, is_dead);
+            is_dead = is_dead || check_for_player(player_pos, grid_check_pos);
             draw_pos.row += i;
             draw_pos.col += j;
             grid_check_pos.row += i;
             grid_check_pos.col += j;
             if (bitmap[grid_check_pos.row][grid_check_pos.col] == 0) {
                 display_pixel_set(draw_pos.col, draw_pos.row, 1);
-                check_for_kill(player_pos, &grid_check_pos, is_dead);
+                is_dead = is_dead || check_for_player(player_pos, grid_check_pos);
             }
         }
     }
+    return is_dead;
 }
 
 
-
-bool draw_bombs(Point* player_pos, Point* grid_origin)
 /* draws all active bombs onto the led matrix and handles countdown
  * logic. returns whether or not the player has been killed by an
  * exploding bomb */
+bool draw_bombs(const Point player_pos, const Point grid_origin)
 {
-    update_map(grid_origin);
+    update_map(&grid_origin);
     Point draw_pos = {0, 0};
     bool is_dead = false;
     for (int bomb = 0; bomb < NUM_BOMBS; bomb++) {
         if (bombs[bomb].active == 1) {
-            draw_pos.row = bombs[bomb].pos.row - grid_origin->row;
-            draw_pos.col = bombs[bomb].pos.col - grid_origin->col;
+            draw_pos.row = bombs[bomb].pos.row - grid_origin.row;
+            draw_pos.col = bombs[bomb].pos.col - grid_origin.col;
             bombs[bomb].fuse -= 1;
             if (bombs[bomb].fuse > 0) {
                 display_pixel_set(draw_pos.col, draw_pos.row, 1);
             } else if (bombs[bomb].fuse > -SHRAPNEL_TIME) {
-                draw_shrapnel(player_pos, &bombs[bomb].pos, &draw_pos, &is_dead);
+                is_dead = draw_shrapnel(player_pos, bombs[bomb].pos, draw_pos);
             } else {
                 bombs[bomb].active = 0;
             }

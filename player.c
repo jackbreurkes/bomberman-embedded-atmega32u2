@@ -11,9 +11,9 @@
 #include <stdbool.h>
 
 
-void move_player_by(Point diff, Player* player)
 /* moves the player by diff if the corresponding position is free
  * otherwise the player's position does not change */
+void move_player_by(const Point diff, Player* player)
 {
     Point new_pos = {player->pos.row + diff.row, player->pos.col + diff.col};
 
@@ -29,17 +29,29 @@ void move_player_by(Point diff, Player* player)
 }
 
 
-static uint16_t player_flash_counter = 0;
-static bool flash_state = 0;
-void draw_player(Point* draw_pos)
+/* checks if the player is at the position defined by check_pos */
+bool check_for_player(const Point player_pos, const Point check_pos)
+{
+	bool player_found = false;
+    if (player_pos.row == check_pos.row && player_pos.col == check_pos.col) {
+        player_found = true;
+    }
+    return player_found;
+}
+
+
 /* draws the player at the correct position on the led matrix
  * flashes the player's LED at the desired rate */
+void draw_player(const Point draw_pos)
 {
+	static uint16_t player_flash_counter = 0;
+	static bool flash_state = 0;
+
     if (player_flash_counter < PLAYER_FLASH_RATE) {
         player_flash_counter++;
     } else {
         flash_state = !flash_state;
         player_flash_counter = 0;
     }
-    display_pixel_set(draw_pos->col, draw_pos->row, flash_state);
+    display_pixel_set(draw_pos.col, draw_pos.row, flash_state);
 }
