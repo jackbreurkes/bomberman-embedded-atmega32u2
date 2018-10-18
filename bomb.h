@@ -22,9 +22,6 @@ typedef struct bomb_s {
 } Bomb;
 
 
-extern Bomb bombs[NUM_BOMBS];
-
-
 /** resets the bombs to their initial states */
 void reset_bombs(void);
 

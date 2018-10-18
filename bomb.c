@@ -14,7 +14,7 @@
 /* keeps track of all the bombs available to the players.
  * the first half are assigned to the current player
  * the second half are assigned to the opponent */
-Bomb bombs[NUM_BOMBS] =
+static Bomb bombs[NUM_BOMBS] =
 {
     {0, 0, {0, 0}, BOMB_FUSE},
     {0, 1, {0, 0}, BOMB_FUSE},
