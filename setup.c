@@ -4,11 +4,10 @@
  * Abhishek Kasera -- 43353168
  */
 
-
 #include "setup.h"
 #include "display.h"
 
-/** bitmap laying out the map of the game
+/* bitmap laying out the map of the game
     1s are walls, 0s are free space
     NOTE: ensure that MAP_ROWS * MAP_COLS < 256 for representing points using chars */
 const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
@@ -63,6 +62,7 @@ void set_draw_positions(const Point player, Point* grid_origin, Point* player_dr
         grid_origin->col = new_grid_origin.col;
     }
 }
+
 
 /* updates the section of the map that is displayed on the LED matrix */
 void update_map(const Point* origin)

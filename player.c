@@ -4,7 +4,6 @@
  * Abhishek Kasera -- 43353168
  */
 
-
 #include "player.h"
 #include "display.h"
 #include "bomb.h"

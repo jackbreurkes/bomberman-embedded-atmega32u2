@@ -4,7 +4,6 @@
  * Abhishek Kasera -- 43353168
  */
 
-
 #include "bomb.h"
 #include "system.h"
 #include "ir_uart.h"
@@ -15,7 +14,8 @@
 /* keeps track of all the bombs available to the players.
  * the first half are assigned to the current player
  * the second half are assigned to the opponent */
-Bomb bombs[NUM_BOMBS] = {
+Bomb bombs[NUM_BOMBS] =
+{
     {0, 0, {0, 0}, BOMB_FUSE},
     {0, 1, {0, 0}, BOMB_FUSE},
     {0, 2, {0, 0}, BOMB_FUSE},

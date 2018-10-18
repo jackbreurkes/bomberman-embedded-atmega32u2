@@ -102,7 +102,6 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
 }
 
 
-
 /* runs the main game once
  * sets the game up, then runs the main game until the player is dead
  * then displays game over message and returns if the player touches
@@ -118,7 +117,6 @@ void play_bomberman(void)
     bool is_dead = false;
 
     uint16_t input_lock_timer = 0;
-
 
     while (!is_dead) {
         pacer_wait();
