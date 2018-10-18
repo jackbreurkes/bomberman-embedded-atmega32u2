@@ -27,7 +27,7 @@ extern const uint8_t bitmap[MAP_ROWS][MAP_COLS];
     @param Point representing the player's position
     @param pointer to the Point representing the top left map position
     @param pointer to the Point representing the player's position on the LED matrix */
-void set_draw_positions(const Point player_pos, Point* grid_origin, Point* player_draw_pos);
+void set_draw_positions(const Point player, Point* grid_origin, Point* player_draw_pos);
 
 
 /** updates the section of the map that is displayed on the LED matrix

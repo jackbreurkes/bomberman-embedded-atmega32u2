@@ -21,7 +21,7 @@
 #define INPUT_LOCK_TIME (PACER_HZ * 5)
 
 
-static Player player = {0, {0, 0}};
+static Point player = {0, 0};
 
 
 /* checks for input and runs functions associated with input
@@ -42,7 +42,7 @@ bool check_and_handle_input(void)
     } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
         move_diff.col = 1; // move right one column
     }  else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-        drop_bomb(player.pos);
+        drop_bomb(player);
     } else {
         input_registered = false;
     }
@@ -73,33 +73,31 @@ void game_init(Point* grid_draw_origin, Point* player_draw_pos)
     tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
     tinygl_text("PRESS NAVSWITCH ");
 
-    bool player_chosen = false;
+    bool ready = false;
 
-    while (!player_chosen) {
+    while (!ready) {
 
         pacer_wait();
 
         navswitch_update();
 
-        if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-            ir_uart_putc('p');
-            player.pos.row = 1;
-            player.pos.col = 1;
-            player_chosen = true;
-        }
-
         if (ir_uart_read_ready_p()) {
             if (ir_uart_getc() == 'p') {
-                player.pos.row = MAP_ROWS - 2;
-                player.pos.col = MAP_COLS - 2;
-                player_chosen = true;
+                player.row = 1;
+				player.col = 1;
+                ready = true;
             }
+        } else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
+            ir_uart_putc('p');
+            player.row = MAP_ROWS - 2;
+            player.col = MAP_COLS - 2;
+            ready = true;
         }
 
         tinygl_update();
     }
 
-    set_draw_positions(player.pos, grid_draw_origin, player_draw_pos);
+    set_draw_positions(player, grid_draw_origin, player_draw_pos);
     update_map(grid_draw_origin);
 }
 
@@ -127,12 +125,12 @@ void play_bomberman(void)
 
         input_registered = check_and_handle_input();
         if (input_registered) {
-            set_draw_positions(player.pos, &grid_draw_origin, &player_draw_pos);
+            set_draw_positions(player, &grid_draw_origin, &player_draw_pos);
             update_map(&grid_draw_origin);
         }
 
         read_bomb();
-        is_dead = draw_bombs(player.pos, grid_draw_origin);
+        is_dead = draw_bombs(player, grid_draw_origin);
 
         draw_player(player_draw_pos);
 

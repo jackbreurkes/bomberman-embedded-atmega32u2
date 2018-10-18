@@ -111,7 +111,7 @@ bool check_for_bomb(const Point check_pos)
 
 /* draws the shrapnel around the exploding bomb and checks if the
  * player has been killed by it */
-bool draw_shrapnel(const Point player_pos, const Point bomb_pos, const Point bomb_draw_pos)
+bool draw_shrapnel(const Point player, const Point bomb_pos, const Point bomb_draw_pos)
 {
     Point directions[5] = {
         {0, 0},
@@ -136,14 +136,14 @@ bool draw_shrapnel(const Point player_pos, const Point bomb_pos, const Point bom
 
         if (bitmap[grid_check_pos.row][grid_check_pos.col] == 0) {
             display_pixel_set(draw_pos.col, draw_pos.row, 1);
-            is_dead = is_dead || check_for_player(player_pos, grid_check_pos);
+            is_dead = is_dead || check_for_player(player, grid_check_pos);
             draw_pos.row += i;
             draw_pos.col += j;
             grid_check_pos.row += i;
             grid_check_pos.col += j;
             if (bitmap[grid_check_pos.row][grid_check_pos.col] == 0) {
                 display_pixel_set(draw_pos.col, draw_pos.row, 1);
-                is_dead = is_dead || check_for_player(player_pos, grid_check_pos);
+                is_dead = is_dead || check_for_player(player, grid_check_pos);
             }
         }
     }
@@ -154,7 +154,7 @@ bool draw_shrapnel(const Point player_pos, const Point bomb_pos, const Point bom
 /* draws all active bombs onto the led matrix and handles countdown
  * logic. returns whether or not the player has been killed by an
  * exploding bomb */
-bool draw_bombs(const Point player_pos, const Point grid_origin)
+bool draw_bombs(const Point player, const Point grid_origin)
 {
     update_map(&grid_origin);
     Point draw_pos = {0, 0};
@@ -167,7 +167,7 @@ bool draw_bombs(const Point player_pos, const Point grid_origin)
             if (bombs[bomb].fuse > 0) {
                 display_pixel_set(draw_pos.col, draw_pos.row, 1);
             } else if (bombs[bomb].fuse > -SHRAPNEL_TIME) {
-                is_dead = draw_shrapnel(player_pos, bombs[bomb].pos, draw_pos);
+                is_dead = draw_shrapnel(player, bombs[bomb].pos, draw_pos);
             } else {
                 bombs[bomb].active = 0;
             }

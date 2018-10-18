@@ -13,9 +13,9 @@
 
 /* moves the player by diff if the corresponding position is free
  * otherwise the player's position does not change */
-void move_player_by(const Point diff, Player* player)
+void move_player_by(const Point diff, Point* player)
 {
-    Point new_pos = {player->pos.row + diff.row, player->pos.col + diff.col};
+    Point new_pos = {player->row + diff.row, player->col + diff.col};
 
     bool in_row_bounds = new_pos.row >= 0 && new_pos.row < MAP_ROWS;
     bool in_col_bounds = new_pos.col >= 0 && new_pos.col < MAP_COLS;
@@ -23,17 +23,17 @@ void move_player_by(const Point diff, Player* player)
     bool has_bomb = check_for_bomb(new_pos);
 
     if (in_row_bounds && in_col_bounds && is_pos_free && !has_bomb) {
-        player->pos.row = new_pos.row;
-        player->pos.col = new_pos.col;
+        player->row = new_pos.row;
+        player->col = new_pos.col;
     }
 }
 
 
 /* checks if the player is at the position defined by check_pos */
-bool check_for_player(const Point player_pos, const Point check_pos)
+bool check_for_player(const Point player, const Point check_pos)
 {
 	bool player_found = false;
-    if (player_pos.row == check_pos.row && player_pos.col == check_pos.col) {
+    if (player.row == check_pos.row && player.col == check_pos.col) {
         player_found = true;
     }
     return player_found;

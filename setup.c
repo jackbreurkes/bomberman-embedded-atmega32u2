@@ -30,11 +30,11 @@ const uint8_t bitmap[MAP_ROWS][MAP_COLS] =
  *     player in the center
  * otherwise updates the player's position on the screen and
  *     leaves the map in place */
-void set_draw_positions(const Point player_pos, Point* grid_origin, Point* player_draw_pos)
+void set_draw_positions(const Point player, Point* grid_origin, Point* player_draw_pos)
 {
     Point new_grid_origin = { // map point to be drawn at top left of matrix
-        player_pos.row - MAT_MID_ROW,
-        player_pos.col - MAT_MID_COL
+        player.row - MAT_MID_ROW,
+        player.col - MAT_MID_COL
     };
     Point new_grid_close = { // map point to be drawn at the bottom right of the matrix
         new_grid_origin.row + LEDMAT_ROWS_NUM - 1,

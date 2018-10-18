@@ -12,27 +12,19 @@
 
 #define PLAYER_FLASH_RATE (PACER_HZ * 0.15)
 
-/** struct representing a player's number and position
- *  num is only used to ensure the players are initially on
- *  opposite corners of the map */
-typedef struct player_s {
-    uint8_t num;
-    Point pos;
-} Player;
-
 
 /** moves the player by diff if the corresponding position is free
     otherwise the player's position does not change
     @param Point representing the amount to move the player by
-    @param pointer to the Player to be moved */
-void move_player_by(const Point diff, Player* player);
+    @param pointer to the player to be moved */
+void move_player_by(const Point diff, Point* player);
 
 
 /** checks if the player is at a position
     @param Point representing the player's position
     @param Point to check the player's position against 
     @return whether the player is at the specified position */
-bool check_for_player(const Point player_pos, const Point check_pos);
+bool check_for_player(const Point player, const Point check_pos);
 
 
 /** draws the player at the correct position on the led matrix
